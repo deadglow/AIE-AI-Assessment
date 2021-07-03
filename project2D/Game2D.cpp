@@ -11,9 +11,6 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 	// Initalise the 2D renderer.
 	m_2dRenderer = new aie::Renderer2D();
 
-	// Create some textures for testing.
-	m_texture = new aie::Texture("./textures/hero.png");
-	m_texture2 = new aie::Texture("./textures/rock_large.png");
 	m_font = new aie::Font("./font/consolas.ttf", 24);
 
 	// Create a player object.
@@ -28,8 +25,6 @@ Game2D::~Game2D()
 
 	// Deleted the textures.
 	delete m_font;
-	delete m_texture;
-	delete m_texture2;
 
 	// Delete the renderer.
 	delete m_2dRenderer;

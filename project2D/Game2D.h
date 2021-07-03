@@ -18,8 +18,6 @@ protected:
 	aie::Renderer2D*	m_2dRenderer;
 
 	// Example textures.
-	aie::Texture*		m_texture;
-	aie::Texture*		m_texture2;
 	aie::Font*			m_font;
 
 	// Player.
