@@ -1,10 +1,11 @@
+#pragma once
 #include "Component.h"
 #include "Matrix3.h"
 #include <vector>
 
 using namespace MathMan;
 
-class Transform : Component
+class Transform : public Component
 {
 public:
 	using Component::Component;
@@ -13,8 +14,10 @@ public:
 	void SetParent(Transform* transform);
 
 	Transform* GetChild(int index);
+	
 	void _AddChild(Transform* child);
 	void _RemoveChild(Transform* child);
+	std::vector<Transform*>* _GetChildrenList();
 
 	int GetChildCount();
 
@@ -43,10 +46,6 @@ public:
 
 	void Translate(Vector2 delta, bool moveLocal = true);
 
-	void Initialise()
-	{
-		
-	}
 protected:
 	Transform* parent = nullptr;
 	std::vector<Transform*> children;

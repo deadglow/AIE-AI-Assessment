@@ -1,8 +1,12 @@
 #pragma once
+#include "Component.h"
 #include "Transform.h"
 #include <unordered_map>
 #include <string>
 #include <typeindex>
+
+class Component;
+class Transform;
 
 class Entity
 {
@@ -16,7 +20,7 @@ public:
 		auto result = components.find(typeid(T));
 		if (result != components.end())
 		{
-			return result->second;
+			return (T*)(result->second);
 		}
 		else
 		{
@@ -32,11 +36,12 @@ public:
 		if (result != components.end())
 		{
 			throw "bruh this already exists";
-			return;
 		}
 		else
 		{
-			components.insert(typeid(T), new T(this));
+			T* newComponent = new T(this);
+			components.insert({ typeid(T), newComponent });
+			return newComponent;
 		}
 	}
 	
@@ -53,6 +58,8 @@ public:
 		throw "Component not found.";
 	}
 
+	Transform* GetTransform();
+
 	int GetComponentCount();
 
 	Entity* Clone();
@@ -67,7 +74,7 @@ public:
 	void SetName(std::string);
 
 protected:
-	std::string name;
+	std::string name = "Entity";
 	Transform* transform;
 	std::unordered_map<std::type_index, Component*> components;
 };

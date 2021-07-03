@@ -2,7 +2,7 @@
 
 Entity::Entity()
 {
-	transform = new Transform(this->transform);
+	transform = AddComponent<Transform>();
 }
 
 Entity::~Entity()
@@ -20,6 +20,11 @@ Entity::~Entity()
 	}
 }
 
+Transform* Entity::GetTransform()
+{
+	return transform;
+}
+
 int Entity::GetComponentCount()
 {
 	return components.size();
@@ -29,18 +34,33 @@ void Entity::Start()
 {
 	for (auto& iter : components)
 		iter.second->Start();
+
+	for (Transform* t : *transform->_GetChildrenList())
+	{
+		t->GetEntity()->Start();
+	}
 }
 
 void Entity::Update()
 {
 	for (auto& iter : components)
 		iter.second->Update();
+
+	for (Transform* t : *transform->_GetChildrenList())
+	{
+		t->GetEntity()->Update();
+	}
 }
 
 void Entity::OnCollision()
 {
 	for (auto& iter : components)
 		iter.second->OnCollision();
+
+	for (Transform* t : *transform->_GetChildrenList())
+	{
+		t->GetEntity()->OnCollision();
+	}
 }
 
 std::string Entity::GetName()

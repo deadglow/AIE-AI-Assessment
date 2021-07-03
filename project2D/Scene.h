@@ -1,14 +1,17 @@
 #pragma once
 #include <string>
 #include "Transform.h"
+#include "Entity.h"
 
 class Scene
 {
 public:
 	Scene();
 	~Scene();
-	Transform* GetRoot();
+	Transform* GetTransform();
 	std::string GetName();
+	Entity* CreateEntity();
+	void Update();
 	void SetName(std::string newName);
 
 protected:

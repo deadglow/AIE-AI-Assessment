@@ -7,7 +7,8 @@ Transform* Transform::GetParent()
 
 void Transform::SetParent(Transform* transform)
 {
-	parent->_RemoveChild(this);
+	if (parent != nullptr)
+		parent->_RemoveChild(this);
 
 	parent = transform;
 
@@ -22,6 +23,11 @@ Transform* Transform::GetChild(int index)
 void Transform::_AddChild(Transform* child)
 {
 	children.push_back(child);
+}
+
+std::vector<Transform*>* Transform::_GetChildrenList()
+{
+	return &children;
 }
 
 void Transform::_RemoveChild(Transform* child)
@@ -121,7 +127,7 @@ void Transform::SetLocalScale(Vector2 scale)
 	localTransform.SetScaleY(scale.y);
 }
 
-void Transform::Translate(Vector2 delta, bool moveLocal = true)
+void Transform::Translate(Vector2 delta, bool moveLocal)
 {
 	if (moveLocal)
 	{
@@ -141,11 +147,16 @@ void Transform::Translate(Vector2 delta, bool moveLocal = true)
 
 void Transform::UpdateGlobalMatrix()
 {
-	globalTransform = parent->GetGlobalTransform() * localTransform;
+	if (parent != nullptr)
+		globalTransform = parent->GetGlobalTransform() * localTransform;
+	else
+		globalTransform = localTransform;
 
 	up = globalTransform.GetUp().Normalised();
 	right = globalTransform.GetRight().Normalised();
 
-	for (Transform* t : children)
-		t->UpdateGlobalMatrix();
+	for (int i = 0; i < children.size(); ++i)
+	{
+		children[i]->UpdateGlobalMatrix();
+	}
 }

@@ -33,18 +33,16 @@ namespace MathMan
 	Matrix3 Matrix3::operator *(Matrix3 other)
 	{
 
-		Matrix3 mat = Matrix3
-		{
-			m[0] = m[0] * other.m[0] + m[3] * other.m[1] + m[6] * other.m[2],
-			m[3] = m[0] * other.m[3] + m[3] * other.m[4] + m[6] * other.m[5],
-			m[6] = m[0] * other.m[6] + m[3] * other.m[7] + m[6] * other.m[8],
-			m[1] = m[1] * other.m[0] + m[4] * other.m[1] + m[7] * other.m[2],
-			m[4] = m[1] * other.m[3] + m[4] * other.m[4] + m[7] * other.m[5],
-			m[7] = m[1] * other.m[6] + m[4] * other.m[7] + m[7] * other.m[8],
-			m[2] = m[2] * other.m[0] + m[5] * other.m[1] + m[8] * other.m[2],
-			m[5] = m[2] * other.m[3] + m[5] * other.m[4] + m[8] * other.m[5],
-			m[8] = m[2] * other.m[6] + m[5] * other.m[7] + m[8] * other.m[8]
-		};
+		Matrix3 mat = Matrix3();
+		mat.m[0] = m[0] * other.m[0] + m[3] * other.m[1] + m[6] * other.m[2];
+		mat.m[3] = m[0] * other.m[3] + m[3] * other.m[4] + m[6] * other.m[5];
+		mat.m[6] = m[0] * other.m[6] + m[3] * other.m[7] + m[6] * other.m[8];
+		mat.m[1] = m[1] * other.m[0] + m[4] * other.m[1] + m[7] * other.m[2];
+		mat.m[4] = m[1] * other.m[3] + m[4] * other.m[4] + m[7] * other.m[5];
+		mat.m[7] = m[1] * other.m[6] + m[4] * other.m[7] + m[7] * other.m[8];
+		mat.m[2] = m[2] * other.m[0] + m[5] * other.m[1] + m[8] * other.m[2];
+		mat.m[5] = m[2] * other.m[3] + m[5] * other.m[4] + m[8] * other.m[5];
+		mat.m[8] = m[2] * other.m[6] + m[5] * other.m[7] + m[8] * other.m[8];
 
 		return mat;
 	}
@@ -62,12 +60,11 @@ namespace MathMan
 	Matrix3 Matrix3::Inverse()
 	{
 		//Gets matrix of minors, negates every second element, moves each element diagonally to the opposite side
-		Matrix3 minors = Matrix3
-		{
-			m[0] = (m[4] * m[8] - m[7] * m[5]),	m[3] = (m[1] * m[8] - m[7] * m[2]),	m[6] = (m[1] * m[5] - m[4] * m[2]),
-			m[1] = (m[3] * m[8] - m[6] * m[5]),	m[4] = (m[0] * m[8] - m[6] * m[2]),	m[7] = (m[0] * m[5] - m[3] * m[2]),
-			m[2] = (m[3] * m[7] - m[4] * m[6]),	m[5] = (m[0] * m[7] - m[6] * m[1]),	m[8] = (m[0] * m[4] - m[3] * m[1])
-		};
+		Matrix3 minors = Matrix3();
+		minors.m[0] = (m[4] * m[8] - m[7] * m[5]),	m[3] = (m[1] * m[8] - m[7] * m[2]),	m[6] = (m[1] * m[5] - m[4] * m[2]);
+		minors.m[1] = (m[3] * m[8] - m[6] * m[5]),	m[4] = (m[0] * m[8] - m[6] * m[2]),	m[7] = (m[0] * m[5] - m[3] * m[2]);
+		minors.m[2] = (m[3] * m[7] - m[4] * m[6]),	m[5] = (m[0] * m[7] - m[6] * m[1]),	m[8] = (m[0] * m[4] - m[3] * m[1]);
+
 		Matrix3 adjugate = Matrix3(minors.m[0], -minors.m[3], minors.m[6], -minors.m[1], minors.m[4], -minors.m[7], minors.m[2], -minors.m[5], minors.m[8]);
 
 		float determinant = m[0] * minors.m[0] - m[3] * minors.m[3] + m[6] * minors.m[6];
@@ -144,6 +141,8 @@ namespace MathMan
 		rotMat.m[1] *= scale.x;
 		rotMat.m[3] *= scale.y;
 		rotMat.m[4] *= scale.y;
+
+		*this = *this * rotMat;
 	}
 
 	float Matrix3::GetRotation()

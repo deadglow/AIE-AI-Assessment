@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <cmath>
 #include "Vector2.h"
 
 namespace MathMan
