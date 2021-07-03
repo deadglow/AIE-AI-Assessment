@@ -4,7 +4,7 @@
 #include "Texture.h"
 #include "Font.h"
 #include "Input.h"
-#include "Player.h"
+#include "Scene.h"
 
 Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game(title, width, height, fullscreen)
 {
@@ -13,15 +13,13 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 
 	m_font = new aie::Font("./font/consolas.ttf", 24);
 
-	// Create a player object.
-	m_Player = new Player();
+	mainScene = new Scene();
 }
 
 Game2D::~Game2D()
 {
-	// Delete player.
-	delete m_Player;
-	m_Player = nullptr;
+	// Delete scene
+	delete mainScene;
 
 	// Deleted the textures.
 	delete m_font;
@@ -32,9 +30,6 @@ Game2D::~Game2D()
 
 void Game2D::Update(float deltaTime)
 {
-	// Update the player.
-	m_Player->Update(deltaTime);
-
 	// Input example: Update the camera position using the arrow keys.
 	aie::Input* input = aie::Input::GetInstance();
 	float camPosX;
@@ -75,31 +70,10 @@ void Game2D::Draw()
 	// Prepare the renderer. This must be called before any sprites are drawn.
 	m_2dRenderer->Begin();
 
-	// Draw the player.
-	m_Player->Draw(m_2dRenderer);
-
-	// Draw a thin line.
-	m_2dRenderer->DrawLine(150.0f, 400.0f, 250.0f, 500.0f, 2.0f);
-
-	// Draw a sprite
-	m_2dRenderer->DrawSprite(m_texture2, 200.0f, 200.0f);
-
-	// Draw a moving purple circle.
-	m_2dRenderer->SetRenderColour(1.0f, 0.0f, 1.0f, 1.0f);
-	m_2dRenderer->DrawCircle(sin(time) * 100.0f + 450.0f, 200.0f, 50.0f);
-
 	// Draw a rotating sprite with no texture, coloured yellow.
 	m_2dRenderer->SetRenderColour(1.0f, 1.0f, 0.0f, 1.0f);
 	m_2dRenderer->DrawSprite(nullptr, 700.0f, 200.0f, 50.0f, 50.0f, time);
 	m_2dRenderer->SetRenderColour(1.0f, 1.0f, 1.0f, 1.0f);
-
-	// Demonstrate animation.
-	float animSpeed = 10.0f;
-	int frame = ((int)(time * animSpeed) % 6);
-	float size = 1.0f / 6.0f;
-	m_2dRenderer->SetUVRect(frame * size, 0.0f, size, 1.0f);
-	m_2dRenderer->DrawSprite(m_texture, 900.0f, 200.0f, 100.0f, 100.0f);
-	m_2dRenderer->SetUVRect(0.0f, 0.0f, 1.0f, 1.0f);
 	
 	// Draw some text.
 	float windowHeight = (float)application->GetWindowHeight();

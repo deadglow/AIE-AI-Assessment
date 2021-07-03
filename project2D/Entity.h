@@ -1,12 +1,8 @@
 #pragma once
-#include <map>
+#include "Transform.h"
+#include <unordered_map>
 #include <string>
 #include <typeindex>
-#include <unordered_map>
-#include "Component.h"
-#include "Transform.h"
-
-typedef std::unordered_map<std::type_index, Component*> CMap;
 
 class Entity
 {
@@ -56,8 +52,22 @@ public:
 		}
 		throw "Component not found.";
 	}
+
+	int GetComponentCount();
+
+	Entity* Clone();
+
+	void Start();
+
+	void Update();
+
+	void OnCollision();
+
+	std::string GetName();
+	void SetName(std::string);
+
 protected:
 	std::string name;
 	Transform* transform;
-	CMap components;
+	std::unordered_map<std::type_index, Component*> components;
 };

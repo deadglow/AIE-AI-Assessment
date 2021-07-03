@@ -20,6 +20,5 @@ protected:
 	// Example textures.
 	aie::Font*			m_font;
 
-	// Player.
-	Player* m_Player;
+	Scene* mainScene;
 };

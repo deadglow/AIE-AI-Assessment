@@ -10,6 +10,7 @@ public:
 	Entity* GetEntity();
 
 	virtual void Initialise() = 0;
+	virtual void Start() {};
 	virtual void Update() {};
 	virtual void OnCollision() {};
 	

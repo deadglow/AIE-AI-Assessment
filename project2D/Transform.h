@@ -12,6 +12,12 @@ public:
 	Transform* GetParent();
 	void SetParent(Transform* transform);
 
+	Transform* GetChild(int index);
+	void _AddChild(Transform* child);
+	void _RemoveChild(Transform* child);
+
+	int GetChildCount();
+
 	Matrix3 GetLocalTransform();
 	Matrix3 GetGlobalTransform();
 
@@ -37,13 +43,16 @@ public:
 
 	void Translate(Vector2 delta, bool moveLocal = true);
 
-	void Initialise() override
+	void Initialise()
 	{
 		
 	}
 protected:
-	Matrix3 localTransform = Matrix3::Identity();
-	Matrix3 globalTransform = Matrix3::Identity();
 	Transform* parent = nullptr;
 	std::vector<Transform*> children;
+
+	Matrix3 localTransform = Matrix3::Identity();
+	Matrix3 globalTransform = Matrix3::Identity();
+	Vector2 up;
+	Vector2 right;
 };
