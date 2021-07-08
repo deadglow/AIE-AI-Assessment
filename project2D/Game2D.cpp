@@ -7,8 +7,26 @@
 #include "Input.h"
 #include "Scene.h"
 #include "Entity.h"
+#include <iostream>
+#include <filesystem>
 
 float Game2D::deltaTime = 1.0f;
+
+void Game2D::LoadTexture()
+{
+	std::string path = "../textures/";
+	for (const auto& entry : std::filesystem::directory_iterator(path))
+	{
+		textures.insert({ entry.path().filename().string(), aie::Texture(entry.path().string().c_str()) });
+
+	}
+}
+
+aie::Texture* Game2D::GetTexture(std::string name)
+{
+	return textures[name];
+}
+
 
 Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game(title, width, height, fullscreen)
 {
@@ -23,6 +41,11 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 	Entity* newEnt = mainScene->CreateEntity();
 
 	newEnt->GetTransform()->SetParent(player->GetTransform());
+	newEnt->GetTransform()->SetLocalPosition({ 45, 90 });
+
+	newEnt = mainScene->CreateEntity();
+
+	newEnt->GetTransform()->SetParent(player->GetTransform()->GetChild(0));
 	newEnt->GetTransform()->SetLocalPosition({ 45, 90 });
 	
 	player->SetName("Jimmy");
@@ -84,8 +107,12 @@ void Game2D::Update(float deltaTime)
 	if (input->IsKeyDown(aie::INPUT_KEY_RIGHT))
 		player->GetTransform()->Translate(Vector2(1, 0) * deltaTime * 100);
 
+	aie::Application* application = aie::Application::GetInstance();
+	float time = application->GetTime();
+
 	mainScene->Update();
-	player->GetTransform()->SetLocalRotation(player->GetTransform()->GetGlobalPosition().x / 360);
+	player->GetTransform()->GetChild(0)->SetLocalRotation(time);
+	player->GetTransform()->SetLocalRotation(time);
 	mainScene->GetTransform()->UpdateGlobalMatrix();
 	mainScene->GetTransform()->UpdateGlobalMatrix();
 
@@ -114,6 +141,8 @@ void Game2D::Draw()
 	pos = player->GetTransform()->GetChild(0)->GetGlobalPosition();
 	m_2dRenderer->SetRenderColour(0.0f, 1.0f, 1.0f, 1.0f);
 	m_2dRenderer->DrawSprite(nullptr, pos.x, pos.y, 20.0f, 20.0f, player->GetTransform()->GetChild(0)->GetGlobalRotation());
+	pos = player->GetTransform()->GetChild(0)->GetChild(0)->GetGlobalPosition();
+	m_2dRenderer->DrawSprite(nullptr, pos.x, pos.y, 20.0f, 20.0f, player->GetTransform()->GetChild(0)->GetChild(0)->GetGlobalRotation());
 
 	m_2dRenderer->SetRenderColour(1.0f, 1.0f, 1.0f, 1.0f);
 	

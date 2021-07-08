@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include "Game.h"
 #include "Renderer2D.h"
 #include "Scene.h"
@@ -15,7 +16,12 @@ public:
 	virtual void Update(float deltaTime);
 	virtual void Draw();
 
+	void LoadTexture();
+	aie::Texture* GetTexture(std::string name);
+
 protected:
+	std::map<std::string, aie::Texture*> textures;
+
 	aie::Renderer2D* m_2dRenderer;
 
 	// Example textures.
