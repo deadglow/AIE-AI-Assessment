@@ -1,12 +1,33 @@
 #include "Player.h"
 #include "Vector2.h"
-#include "Entity.h"
-#include "Input.h"
 #include "Application.h"
+#include "Input.h"
+#include "Entity.h"
+#include "Sprite.h"
+
+Player::Player(Entity* ent) : Component::Component(ent)
+{
+	//Create upper body
+	Entity* newEnt = entity->CreateEntity(entity->GetTransform());
+	newEnt->AddComponent<Sprite>();
+	newEnt->GetComponent<Sprite>()->SetTexture(entity->GetGameData()->GetTexture("torso.png"));
+
+	newEnt->GetComponent<Sprite>()->SetDepth(-1.0f);
+
+	targeter = newEnt->GetTransform();
+
+}
 
 Player::~Player()
 {
 
+}
+
+Player* Player::CloneTo(Entity* ent)
+{
+	Player* newPlayer = ent->AddComponent<Player>();
+	//do this
+	return newPlayer;
 }
 
 void Player::Update()
@@ -34,18 +55,15 @@ void Player::Update()
 		inputVec.y -= 1.0f;
 	}
 
+	if (inputVec.SqrMagnitude() > 0)
+		inputVec = inputVec.Normalised();
+
 	Transform* transform = entity->GetTransform();
-	transform->Translate(entity->GetTransform()->GetUp() * inputVec.y * speed * deltaTime);
-	transform->Rotate(rotationSpeed * deltaTime * -inputVec.x * DEG2RAD);
 
-	aie::Application* app = aie::Application::GetInstance();
+	Vector2 point = { (float)input->GetMouseX(), (float)input->GetMouseY() };
+
+	targeter->LookAt(point);
+
+	transform->Translate(inputVec * speed * deltaTime, true);
 	
-	float scale = minScale + sin(app->GetTime() * scaleFrequency) * maxScaleOffset;
-	transform->SetLocalScale(Vector2::One() * scale);
 }
-
-//void Player::Draw(aie::Renderer2D* renderer)
-//{
-//	// Draw the player's sprite.
-//	renderer->DrawSprite(m_texture, m_posX, m_posY);
-//}

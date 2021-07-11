@@ -1,6 +1,7 @@
 #include "Entity.h"
 #include "Component.h"
 #include "Transform.h"
+#include "Scene.h"
 
 Entity::Entity(Game2D* gameData)
 {
@@ -33,19 +34,33 @@ Game2D* Entity::GetGameData()
 	return gameData;
 }
 
-int Entity::GetComponentCount()
+size_t Entity::GetComponentCount()
 {
 	return components.size();
 }
 
 Entity* Entity::Clone()
 {
+	//Create new entity and clone each of this object's components to it
 	Entity* newEnt = new Entity(this->gameData);
 	
 	for (const auto& component : components)
 	{
-		newEnt->components.insert({typeid(decltype(component.second)), new decltype(component.second)(component.second) });
+		component.second->CloneTo(newEnt);
 	}
+
+	//Get number of children
+	int childCount = transform->GetChildCount();
+	
+	//Loop through, clone all children and set their parent to the new clone.
+	//This is recursive, so all children's children will be cloned and so on.
+	for (int i = 0; i < childCount; ++i)
+	{
+		Entity* clone = transform->GetChild(i)->GetEntity()->Clone();
+		clone->transform->SetParent(newEnt->transform);
+	}
+
+	return newEnt;
 }
 
 void Entity::Start()
@@ -89,4 +104,14 @@ std::string Entity::GetName()
 void Entity::SetName(std::string newName)
 {
 	name = newName;
+}
+
+Entity* Entity::CreateEntity(Transform* parent)
+{
+	return gameData->GetMainScene()->CreateEntity(parent);
+}
+
+Entity* Entity::CreateEntity()
+{
+	return gameData->GetMainScene()->CreateEntity();
 }

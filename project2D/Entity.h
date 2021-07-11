@@ -30,9 +30,8 @@ public:
 	template <class T>
 	T* AddComponent()
 	{
-		auto& result = components.find(typeid(T));
 
-		if (result != components.end())
+		if (components.find(typeid(T)) != components.end())
 		{
 			throw "bruh this already exists";
 		}
@@ -61,7 +60,7 @@ public:
 
 	Game2D* GetGameData();
 
-	int GetComponentCount();
+	size_t GetComponentCount();
 
 	Entity* Clone();
 
@@ -73,6 +72,9 @@ public:
 
 	std::string GetName();
 	void SetName(std::string);
+
+	Entity* CreateEntity(Transform* transform);
+	Entity* CreateEntity();
 
 protected:
 	Game2D* gameData;

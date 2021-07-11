@@ -11,11 +11,11 @@ public:
 	
 	Entity* GetEntity();
 
-	virtual void Initialise() {};
 	virtual void Start() {};
 	virtual void Update() {};
 	virtual void OnCollision() {};
 	virtual void OnDestroy() {};
+	virtual Component* CloneTo(Entity* ent) = 0;
 	
 protected:
 	Entity* entity;

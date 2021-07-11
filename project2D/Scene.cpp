@@ -27,11 +27,16 @@ std::string Scene::GetName()
 	return name;
 }
 
-Entity* Scene::CreateEntity()
+Entity* Scene::CreateEntity(Transform* parent)
 {
 	Entity* newEnt = new Entity(gameData);
-	newEnt->GetTransform()->SetParent(transform);
+	newEnt->GetTransform()->SetParent(parent);
 	return newEnt;
+}
+
+Entity* Scene::CreateEntity()
+{
+	return CreateEntity(this->transform);
 }
 
 void Scene::Update()

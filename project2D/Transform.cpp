@@ -1,8 +1,19 @@
 #include "Transform.h"
+#include "Entity.h"
 
 Transform::~Transform()
 {
 	
+}
+
+Transform* Transform::CloneTo(Entity* ent)
+{
+	//Don't clone, just copy data since transform already exists
+	Transform* newTransform = ent->GetTransform();
+	newTransform->localTransform = this->localTransform;
+	newTransform->parent = this->parent;
+
+	return newTransform;
 }
 
 Transform* Transform::GetParent()
@@ -45,7 +56,7 @@ void Transform::_RemoveChild(Transform* child)
 	children.erase(iter);
 }
 
-int Transform::GetChildCount()
+size_t Transform::GetChildCount()
 {
 	return children.size();
 }
@@ -108,17 +119,8 @@ float Transform::GetGlobalRotation()
 
 void Transform::SetGlobalRotation(float radians)
 {
-	Matrix3 rotMat = Matrix3::Identity();
-	rotMat.SetRotateZ(radians);
 
-	rotMat = rotMat * globalTransform.Inverse();
-	rotMat.m[6] = 0;
-	rotMat.m[7] = 0;
-
-	rotMat.SetScaleX(1);
-	rotMat.SetScaleY(1);
-
-	localTransform = localTransform * rotMat;
+	SetLocalRotation(-parent->GetGlobalRotation() + radians);
 }
 
 Vector2 Transform::GetLocalScale()
@@ -156,7 +158,21 @@ void Transform::Rotate(float radians)
 	rotMat.SetRotateZ(radians);
 
 	localTransform = localTransform * rotMat;
-}	
+}
+
+void Transform::LookAt(Vector2 point)
+{
+	Vector2 objectToMouse = point - GetGlobalPosition();
+
+	objectToMouse = objectToMouse.Normalised();
+
+	float newRotation = atan2(objectToMouse.y, objectToMouse.x);
+
+	if (isnan<float>(newRotation))
+		newRotation = 0;
+
+	SetGlobalRotation(newRotation);
+}
 
 void Transform::UpdateGlobalMatrix()
 {

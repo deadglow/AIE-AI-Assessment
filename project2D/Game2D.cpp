@@ -17,6 +17,11 @@ aie::Renderer2D* Game2D::GetRenderer()
 	return m_2dRenderer;
 }
 
+Scene* Game2D::GetMainScene()
+{
+	return mainScene;
+}
+
 void Game2D::LoadTextures()
 {
 	std::string path = "../bin/textures/";
@@ -54,7 +59,7 @@ void Game2D::SetTimeScale(float scale)
 
 void Game2D::AddSpriteDrawCall(Sprite* sprite)
 {
-	sprites.push_back(sprite);
+	sprites.push(sprite);
 }
 
 
@@ -68,20 +73,14 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 	m_font = new aie::Font("./font/consolas.ttf", 30);
 
 	mainScene = new Scene(this);
+
+	//Player
 	player = mainScene->CreateEntity();
 	player->AddComponent<Player>();
 	player->AddComponent<Sprite>();
-	player->GetComponent<Sprite>()->SetTexture(textures["ship.png"]);
-	
-	//Entity* newEnt = mainScene->CreateEntity();
+	player->GetComponent<Sprite>()->SetTexture(textures["block.png"]);
 
-	//newEnt->GetTransform()->SetParent(player->GetTransform());
-	//newEnt->GetTransform()->SetLocalPosition({ 45, 90 });
 
-	//newEnt = mainScene->CreateEntity();
-
-	//newEnt->GetTransform()->SetParent(player->GetTransform()->GetChild(0));
-	//newEnt->GetTransform()->SetLocalPosition({ 45, 90 });
 }
 
 Game2D::~Game2D()
@@ -152,22 +151,13 @@ void Game2D::Draw()
 
 	// Prepare the renderer. This must be called before any sprites are drawn.
 	m_2dRenderer->Begin();
-
-	// Draw a rotating sprite with no texture, coloured yellow.
-	//Vector2 pos = player->GetTransform()->GetGlobalPosition();
-	//m_2dRenderer->SetRenderColour(1.0f, 1.0f, 0.0f, 1.0f);
-	//m_2dRenderer->DrawSprite(nullptr, pos.x, pos.y, 50.0f, 50.0f, player->GetTransform()->GetGlobalRotation());
-
-	/*pos = player->GetTransform()->GetChild(0)->GetGlobalPosition();
-	m_2dRenderer->SetRenderColour(0.0f, 1.0f, 1.0f, 1.0f);
-	m_2dRenderer->DrawSprite(nullptr, pos.x, pos.y, 20.0f, 20.0f, player->GetTransform()->GetChild(0)->GetGlobalRotation());
-	pos = player->GetTransform()->GetChild(0)->GetChild(0)->GetGlobalPosition();
-	m_2dRenderer->DrawSprite(nullptr, pos.x, pos.y, 20.0f, 20.0f, player->GetTransform()->GetChild(0)->GetChild(0)->GetGlobalRotation());*/
 	
-	for (auto& element : sprites)
-		element->Draw();
-
-	sprites.clear();
+	//Draw all sprites in queue
+	while (!sprites.empty())
+	{
+		sprites.front()->Draw();
+		sprites.pop();
+	}
 	
 	// Draw some text.
 	m_2dRenderer->SetRenderColour(1.0f, 1.0f, 1.0f, 1.0f);

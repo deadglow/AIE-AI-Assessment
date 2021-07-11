@@ -67,7 +67,12 @@ namespace MathMan
 
 		float Magnitude()
 		{
-			return sqrtf(x * x + y * y);
+			return sqrtf(SqrMagnitude());
+		}
+
+		float SqrMagnitude()
+		{
+			return x * x + y * y;
 		}
 
 		Vector2 Normalised()
@@ -75,9 +80,38 @@ namespace MathMan
 			return *this / this->Magnitude();
 		}
 
+		Vector2 RightAngle()
+		{
+			return Vector2(y, -x);
+		}
+
 		static Vector2 Scale(Vector2 a, Vector2 b)
 		{
 			return Vector2(a.x * b.x, a.y * b.y);
+		}
+
+		static float Dot(Vector2 a, Vector2 b)
+		{
+			return a.x * b.x + a.y * b.y;
+		}
+
+		static float Angle(Vector2 a, Vector2 b)
+		{
+			return (float)acos(Dot(a, b) / (a.Magnitude() * b.Magnitude()));
+		}
+
+		static float SignedAngle(Vector2 a, Vector2 b)
+		{
+			a = a.Normalised();
+			b = b.Normalised();
+
+			float angle = (float)acos(Dot(a, b));
+
+			Vector2 rAngle = a.RightAngle();
+			if (Dot(b, rAngle) < 0)
+				angle = -angle;
+
+			return angle;
 		}
 
 		static Vector2 One()

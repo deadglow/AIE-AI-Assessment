@@ -3,7 +3,9 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <queue>
 #include "Game.h"
+#include "Vector2.h"
 #include "Renderer2D.h"
 
 class Sprite;
@@ -25,6 +27,8 @@ public:
 	void LoadTextures();
 	aie::Texture* GetTexture(std::string name);
 
+	Scene* GetMainScene();
+
 	float GetDeltaTime();
 	float GetUnscaledDeltaTime();
 	float GetTimeScale();
@@ -37,6 +41,7 @@ protected:
 	float unscaledDeltaTime = 1.0f;
 	float deltaTime = 1.0f;
 	float timeScale = 1.0f;
+	MathMan::Vector2 mousePos;
 
 	aie::Renderer2D* m_2dRenderer;
 
@@ -46,5 +51,5 @@ protected:
 	Entity* player;
 	
 	std::map<std::string, aie::Texture*> textures;
-	std::vector<Sprite*> sprites;
+	std::queue<Sprite*> sprites;
 };

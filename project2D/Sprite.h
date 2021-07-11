@@ -7,6 +7,9 @@ class Sprite : public Component
 {
 public:
 	using Component::Component;
+
+	Sprite* CloneTo(Entity* ent) override;
+	
 	void Update() override;
 	void Draw();
 

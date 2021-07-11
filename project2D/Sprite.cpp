@@ -1,6 +1,20 @@
 #include "Sprite.h"
 #include "Entity.h"
 
+Sprite* Sprite::CloneTo(Entity* ent)
+{
+	//Copy all this shiiiiii
+	Sprite* newSprite = ent->AddComponent<Sprite>();
+	newSprite->tex = this->tex;
+	newSprite->rotation = this->rotation;
+	newSprite->depth = this->depth;
+	newSprite->tint = this->tint;
+	newSprite->flipX = this->flipX;
+	newSprite->flipY = this->flipY;
+
+	return newSprite;
+}
+
 void Sprite::Update()
 {
 	entity->GetGameData()->AddSpriteDrawCall(this);

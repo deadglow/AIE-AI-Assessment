@@ -32,7 +32,7 @@ namespace MathMan
 
 	Matrix3 Matrix3::operator *(Matrix3 other)
 	{
-
+		//Matrix multiplication ;)
 		Matrix3 mat = Matrix3();
 		mat.m[0] = m[0] * other.m[0] + m[3] * other.m[1] + m[6] * other.m[2];
 		mat.m[3] = m[0] * other.m[3] + m[3] * other.m[4] + m[6] * other.m[5];
@@ -61,13 +61,13 @@ namespace MathMan
 	{
 		//Gets matrix of minors, negates every second element, moves each element diagonally to the opposite side
 		Matrix3 minors = Matrix3();
-		minors.m[0] = (m[4] * m[8] - m[7] * m[5]),	m[3] = (m[1] * m[8] - m[7] * m[2]),	m[6] = (m[1] * m[5] - m[4] * m[2]);
-		minors.m[1] = (m[3] * m[8] - m[6] * m[5]),	m[4] = (m[0] * m[8] - m[6] * m[2]),	m[7] = (m[0] * m[5] - m[3] * m[2]);
-		minors.m[2] = (m[3] * m[7] - m[4] * m[6]),	m[5] = (m[0] * m[7] - m[6] * m[1]),	m[8] = (m[0] * m[4] - m[3] * m[1]);
+		minors.m[0] = (m[4] * m[8] - m[7] * m[5]);	m[3] = (m[1] * m[8] - m[7] * m[2]); m[6] = (m[1] * m[5] - m[4] * m[2]);
+		minors.m[1] = (m[3] * m[8] - m[6] * m[5]);	m[4] = (m[0] * m[8] - m[6] * m[2]); m[7] = (m[0] * m[5] - m[3] * m[2]);
+		minors.m[2] = (m[3] * m[7] - m[4] * m[6]);	m[5] = (m[0] * m[7] - m[6] * m[1]); m[8] = (m[0] * m[4] - m[3] * m[1]);
 
 		Matrix3 adjugate = Matrix3(minors.m[0], -minors.m[3], minors.m[6], -minors.m[1], minors.m[4], -minors.m[7], minors.m[2], -minors.m[5], minors.m[8]);
 
-		float determinant = m[0] * minors.m[0] - m[3] * minors.m[3] + m[6] * minors.m[6];
+		float determinant = (m[0] * minors.m[0]) - (m[3] * minors.m[3]) + (m[6] * minors.m[6]);
 
 		if (determinant == 0)
 			throw ("Cannot divide adjugate by 0");
@@ -147,7 +147,7 @@ namespace MathMan
 
 	float Matrix3::GetRotation()
 	{
-		Vector2 right = GetRight().Normalised();
+		Vector2 right = GetRight();
 		return std::atan2(right.y, right.x);
 	}
 

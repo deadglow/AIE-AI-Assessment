@@ -12,6 +12,8 @@ public:
 
 	~Transform();
 
+	Transform* CloneTo(Entity* ent) override;
+
 	Transform* GetParent();
 	void SetParent(Transform* transform);
 
@@ -21,7 +23,7 @@ public:
 	void _RemoveChild(Transform* child);
 	std::vector<Transform*>* _GetChildrenList();
 
-	int GetChildCount();
+	size_t GetChildCount();
 
 	Matrix3 GetLocalTransform();
 	Matrix3 GetGlobalTransform();
@@ -49,6 +51,8 @@ public:
 	void Translate(Vector2 delta, bool moveLocal = true);
 	
 	void Rotate(float radians);
+
+	void LookAt(Vector2 point);
 
 protected:
 	Transform* parent = nullptr;

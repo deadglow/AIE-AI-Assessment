@@ -11,6 +11,7 @@ public:
 	~Scene();
 	Transform* GetTransform();
 	std::string GetName();
+	Entity* CreateEntity(Transform* parent);
 	Entity* CreateEntity();
 	void Update();
 	void SetName(std::string newName);
