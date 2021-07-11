@@ -1,7 +1,7 @@
 #pragma once
-#include "Component.h"
-#include "Matrix3.h"
 #include <vector>
+#include "Matrix3.h"
+#include "Component.h"
 
 using namespace MathMan;
 
@@ -9,6 +9,8 @@ class Transform : public Component
 {
 public:
 	using Component::Component;
+
+	~Transform();
 
 	Transform* GetParent();
 	void SetParent(Transform* transform);
@@ -45,6 +47,8 @@ public:
 	void UpdateGlobalMatrix();
 
 	void Translate(Vector2 delta, bool moveLocal = true);
+	
+	void Rotate(float radians);
 
 protected:
 	Transform* parent = nullptr;

@@ -1,5 +1,10 @@
 #include "Transform.h"
 
+Transform::~Transform()
+{
+	
+}
+
 Transform* Transform::GetParent()
 {
 	return parent;
@@ -144,6 +149,14 @@ void Transform::Translate(Vector2 delta, bool moveLocal)
 		localTransform = translationMatrix * localTransform;
 	}
 }
+
+void Transform::Rotate(float radians)
+{
+	Matrix3 rotMat = Matrix3::Identity();
+	rotMat.SetRotateZ(radians);
+
+	localTransform = localTransform * rotMat;
+}	
 
 void Transform::UpdateGlobalMatrix()
 {

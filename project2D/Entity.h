@@ -5,19 +5,18 @@
 #include <string>
 #include <typeindex>
 
-class Component;
-class Transform;
+class Game2D;
 
 class Entity
 {
 public:
-	Entity();
+	Entity(Game2D* gameData);
 	~Entity();
 
 	template <class T>
 	T* GetComponent()
 	{
-		auto result = components.find(typeid(T));
+		auto& result = components.find(typeid(T));
 		if (result != components.end())
 		{
 			return (T*)(result->second);
@@ -31,7 +30,7 @@ public:
 	template <class T>
 	T* AddComponent()
 	{
-		auto result = components.find(typeid(T));
+		auto& result = components.find(typeid(T));
 
 		if (result != components.end())
 		{
@@ -48,17 +47,19 @@ public:
 	template <class T>
 	void RemoveComponent()
 	{
-		auto result = components.find(typeid(T));
+		auto& result = components.find(typeid(T));
 
 		if (result != components.end())
 		{
 			delete result->second;
-			components.erase(result);
+			components.erase(result->first);
 		}
 		throw "Component not found.";
 	}
 
 	Transform* GetTransform();
+
+	Game2D* GetGameData();
 
 	int GetComponentCount();
 
@@ -74,7 +75,8 @@ public:
 	void SetName(std::string);
 
 protected:
-	std::string name = "Entity";
+	Game2D* gameData;
+	std::string name;
 	Transform* transform;
 	std::unordered_map<std::type_index, Component*> components;
 };

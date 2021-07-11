@@ -1,4 +1,5 @@
 #pragma once
+#include "Game2D.h"
 
 class Entity;
 
@@ -6,7 +7,7 @@ class Component
 {
 public:
 	Component(Entity* entity);
-	virtual ~Component() {};
+	~Component() {};
 	
 	Entity* GetEntity();
 
@@ -14,6 +15,7 @@ public:
 	virtual void Start() {};
 	virtual void Update() {};
 	virtual void OnCollision() {};
+	virtual void OnDestroy() {};
 	
 protected:
 	Entity* entity;

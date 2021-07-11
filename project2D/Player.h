@@ -1,21 +1,21 @@
 #pragma once
 
+#include "Component.h"
 #include "Renderer2D.h"
 #include "Texture.h"
 
-class Player
+class Player : public Component
 {
 public:
-	Player();
+	using Component::Component;
 	~Player();
-
-	void Update(float deltaTime);
-	void Draw(aie::Renderer2D* renderer);
+	void Update() override;
 
 private:
-	aie::Texture* m_texture;
-
-	float m_posX;
-	float m_posY;
+	float speed = 150.0f;
+	float rotationSpeed = 90.0f;
+	float minScale = 1.0f;
+	float maxScaleOffset = 0.2f;
+	float scaleFrequency = 2.0f;
 };
 

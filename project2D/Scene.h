@@ -2,11 +2,12 @@
 #include <string>
 #include "Transform.h"
 #include "Entity.h"
+#include "Game2D.h"
 
 class Scene
 {
 public:
-	Scene();
+	Scene(Game2D* gameData);
 	~Scene();
 	Transform* GetTransform();
 	std::string GetName();
@@ -15,6 +16,7 @@ public:
 	void SetName(std::string newName);
 
 protected:
-	std::string name = "Scene";
+	Game2D* gameData;
+	std::string name;
 	Transform* transform;
 };

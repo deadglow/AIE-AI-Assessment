@@ -1,24 +1,29 @@
 #include "Game2D.h"
 
+#include <string>
 #include <iostream>
+#include <filesystem>
 #include "Application.h"
 #include "Texture.h"
 #include "Font.h"
 #include "Input.h"
 #include "Scene.h"
 #include "Entity.h"
-#include <iostream>
-#include <filesystem>
+#include "Sprite.h"
+#include "Player.h"
 
-float Game2D::deltaTime = 1.0f;
-
-void Game2D::LoadTexture()
+aie::Renderer2D* Game2D::GetRenderer()
 {
-	std::string path = "../textures/";
+	return m_2dRenderer;
+}
+
+void Game2D::LoadTextures()
+{
+	std::string path = "../bin/textures/";
+
 	for (const auto& entry : std::filesystem::directory_iterator(path))
 	{
-		textures.insert({ entry.path().filename().string(), aie::Texture(entry.path().string().c_str()) });
-
+		textures.insert(std::make_pair(entry.path().filename().string(), new aie::Texture(entry.path().string().c_str())));
 	}
 }
 
@@ -27,30 +32,56 @@ aie::Texture* Game2D::GetTexture(std::string name)
 	return textures[name];
 }
 
+float Game2D::GetDeltaTime()
+{
+	return deltaTime;
+}
+
+float Game2D::GetUnscaledDeltaTime()
+{
+	return unscaledDeltaTime;
+}
+
+float Game2D::GetTimeScale()
+{
+	return timeScale;
+}
+
+void Game2D::SetTimeScale(float scale)
+{
+	timeScale = scale;
+}
+
+void Game2D::AddSpriteDrawCall(Sprite* sprite)
+{
+	sprites.push_back(sprite);
+}
+
 
 Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game(title, width, height, fullscreen)
 {
 	// Initalise the 2D renderer.
 	m_2dRenderer = new aie::Renderer2D();
 
-	m_font = new aie::Font("./font/consolas.ttf", 64);
+	LoadTextures();
 
-	mainScene = new Scene();
+	m_font = new aie::Font("./font/consolas.ttf", 30);
+
+	mainScene = new Scene(this);
 	player = mainScene->CreateEntity();
+	player->AddComponent<Player>();
+	player->AddComponent<Sprite>();
+	player->GetComponent<Sprite>()->SetTexture(textures["ship.png"]);
 	
-	Entity* newEnt = mainScene->CreateEntity();
+	//Entity* newEnt = mainScene->CreateEntity();
 
-	newEnt->GetTransform()->SetParent(player->GetTransform());
-	newEnt->GetTransform()->SetLocalPosition({ 45, 90 });
+	//newEnt->GetTransform()->SetParent(player->GetTransform());
+	//newEnt->GetTransform()->SetLocalPosition({ 45, 90 });
 
-	newEnt = mainScene->CreateEntity();
+	//newEnt = mainScene->CreateEntity();
 
-	newEnt->GetTransform()->SetParent(player->GetTransform()->GetChild(0));
-	newEnt->GetTransform()->SetLocalPosition({ 45, 90 });
-	
-	player->SetName("Jimmy");
-	std::cout << player->GetName() << std::endl;
-
+	//newEnt->GetTransform()->SetParent(player->GetTransform()->GetChild(0));
+	//newEnt->GetTransform()->SetLocalPosition({ 45, 90 });
 }
 
 Game2D::~Game2D()
@@ -60,6 +91,12 @@ Game2D::~Game2D()
 
 	// Deleted the textures.
 	delete m_font;
+	
+	for (auto& element : textures)
+	{
+		delete element.second;
+		element.second = nullptr;
+	}
 
 	// Delete the renderer.
 	delete m_2dRenderer;
@@ -67,9 +104,11 @@ Game2D::~Game2D()
 
 void Game2D::Update(float deltaTime)
 {
-	Game2D::deltaTime = deltaTime;
-	// Input example: Update the camera position using the arrow keys.
 	aie::Input* input = aie::Input::GetInstance();
+	
+	//Update deltaTime
+	this->unscaledDeltaTime = deltaTime;
+	this->deltaTime = unscaledDeltaTime * timeScale;
 
 	// Exit the application if escape is pressed.
 	if (input->IsKeyDown(aie::INPUT_KEY_ESCAPE))
@@ -95,27 +134,8 @@ void Game2D::Update(float deltaTime)
 	if (input->IsKeyDown(aie::INPUT_KEY_D))
 		camPosX += 500.0f * deltaTime;
 
-	if (input->IsKeyDown(aie::INPUT_KEY_UP))
-		player->GetTransform()->Translate(Vector2(0, 1) * deltaTime * 100);
-
-	if (input->IsKeyDown(aie::INPUT_KEY_DOWN))
-		player->GetTransform()->Translate(Vector2(0, -1) * deltaTime * 100);
-
-	if (input->IsKeyDown(aie::INPUT_KEY_LEFT))
-		player->GetTransform()->Translate(Vector2(-1, 0) * deltaTime * 100);
-
-	if (input->IsKeyDown(aie::INPUT_KEY_RIGHT))
-		player->GetTransform()->Translate(Vector2(1, 0) * deltaTime * 100);
-
-	aie::Application* application = aie::Application::GetInstance();
-	float time = application->GetTime();
-
 	mainScene->Update();
-	player->GetTransform()->GetChild(0)->SetLocalRotation(time);
-	player->GetTransform()->SetLocalRotation(time);
 	mainScene->GetTransform()->UpdateGlobalMatrix();
-	mainScene->GetTransform()->UpdateGlobalMatrix();
-
 
 	m_2dRenderer->SetCameraPos(camPosX, camPosY);
 
@@ -134,19 +154,23 @@ void Game2D::Draw()
 	m_2dRenderer->Begin();
 
 	// Draw a rotating sprite with no texture, coloured yellow.
-	Vector2 pos = player->GetTransform()->GetGlobalPosition();
-	m_2dRenderer->SetRenderColour(1.0f, 1.0f, 0.0f, 1.0f);
-	m_2dRenderer->DrawSprite(nullptr, pos.x, pos.y, 50.0f, 50.0f, player->GetTransform()->GetGlobalRotation());
+	//Vector2 pos = player->GetTransform()->GetGlobalPosition();
+	//m_2dRenderer->SetRenderColour(1.0f, 1.0f, 0.0f, 1.0f);
+	//m_2dRenderer->DrawSprite(nullptr, pos.x, pos.y, 50.0f, 50.0f, player->GetTransform()->GetGlobalRotation());
 
-	pos = player->GetTransform()->GetChild(0)->GetGlobalPosition();
+	/*pos = player->GetTransform()->GetChild(0)->GetGlobalPosition();
 	m_2dRenderer->SetRenderColour(0.0f, 1.0f, 1.0f, 1.0f);
 	m_2dRenderer->DrawSprite(nullptr, pos.x, pos.y, 20.0f, 20.0f, player->GetTransform()->GetChild(0)->GetGlobalRotation());
 	pos = player->GetTransform()->GetChild(0)->GetChild(0)->GetGlobalPosition();
-	m_2dRenderer->DrawSprite(nullptr, pos.x, pos.y, 20.0f, 20.0f, player->GetTransform()->GetChild(0)->GetChild(0)->GetGlobalRotation());
+	m_2dRenderer->DrawSprite(nullptr, pos.x, pos.y, 20.0f, 20.0f, player->GetTransform()->GetChild(0)->GetChild(0)->GetGlobalRotation());*/
+	
+	for (auto& element : sprites)
+		element->Draw();
 
-	m_2dRenderer->SetRenderColour(1.0f, 1.0f, 1.0f, 1.0f);
+	sprites.clear();
 	
 	// Draw some text.
+	m_2dRenderer->SetRenderColour(1.0f, 1.0f, 1.0f, 1.0f);
 	float windowHeight = (float)application->GetWindowHeight();
 	char fps[32];
 	sprintf_s(fps, 32, "FPS: %i", application->GetFPS());

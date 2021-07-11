@@ -65,7 +65,6 @@ namespace MathMan
 			return *this;
 		}
 
-
 		float Magnitude()
 		{
 			return sqrtf(x * x + y * y);
@@ -79,6 +78,21 @@ namespace MathMan
 		static Vector2 Scale(Vector2 a, Vector2 b)
 		{
 			return Vector2(a.x * b.x, a.y * b.y);
+		}
+
+		static Vector2 One()
+		{
+			return Vector2(1, 1);
+		}
+
+		static Vector2 Up()
+		{
+			return Vector2(0, 1);
+		}
+
+		static Vector2 Right()
+		{
+			return Vector2(1, 0);
 		}
 	};
 }

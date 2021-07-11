@@ -1,47 +1,51 @@
 #include "Player.h"
+#include "Vector2.h"
+#include "Entity.h"
 #include "Input.h"
-
-Player::Player()
-{
-	// Load the player's sprite.
-	m_texture = new aie::Texture("./textures/ship.png");
-
-	// Set the player's position.
-	m_posX = 600;
-	m_posY = 400;
-}
+#include "Application.h"
 
 Player::~Player()
 {
-	// Delete the player's sprite.
-	delete m_texture;
-	m_texture = nullptr;
+
 }
 
-void Player::Update(float deltaTime)
+void Player::Update()
 {
 	// Update input for the player.
 	aie::Input* input = aie::Input::GetInstance();
+
+	float deltaTime = entity->GetGameData()->GetDeltaTime();
+
+	Vector2 inputVec = { 0, 0 };
 	if (input->IsKeyDown(aie::INPUT_KEY_LEFT))
 	{
-		m_posX -= 500.0f * deltaTime;
+		inputVec.x -= 1.0f;
 	}
 	if (input->IsKeyDown(aie::INPUT_KEY_RIGHT))
 	{
-		m_posX += 500.0f * deltaTime;
+		inputVec.x += 1.0f;
 	}
 	if (input->IsKeyDown(aie::INPUT_KEY_UP))
 	{
-		m_posY += 500.0f * deltaTime;
+		inputVec.y += 1.0f;
 	}
 	if (input->IsKeyDown(aie::INPUT_KEY_DOWN))
 	{
-		m_posY -= 500.0f * deltaTime;
+		inputVec.y -= 1.0f;
 	}
+
+	Transform* transform = entity->GetTransform();
+	transform->Translate(entity->GetTransform()->GetUp() * inputVec.y * speed * deltaTime);
+	transform->Rotate(rotationSpeed * deltaTime * -inputVec.x * DEG2RAD);
+
+	aie::Application* app = aie::Application::GetInstance();
+	
+	float scale = minScale + sin(app->GetTime() * scaleFrequency) * maxScaleOffset;
+	transform->SetLocalScale(Vector2::One() * scale);
 }
 
-void Player::Draw(aie::Renderer2D* renderer)
-{
-	// Draw the player's sprite.
-	renderer->DrawSprite(m_texture, m_posX, m_posY);
-}
+//void Player::Draw(aie::Renderer2D* renderer)
+//{
+//	// Draw the player's sprite.
+//	renderer->DrawSprite(m_texture, m_posX, m_posY);
+//}

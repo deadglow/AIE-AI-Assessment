@@ -5,6 +5,10 @@
 
 namespace MathMan
 {
+	#define DEG2RAD 0.01745329f
+	#define RAD2DEG	57.2957795f
+
+
 	struct Matrix3
 	{
 		//	________Structure________

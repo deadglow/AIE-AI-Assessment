@@ -1,7 +1,9 @@
 #include "Scene.h"
+#include "Game2D.h"
 
-Scene::Scene()
+Scene::Scene(Game2D* gameData)
 {
+	this->gameData = gameData;
 	transform = new Transform(nullptr);
 }
 
@@ -27,7 +29,7 @@ std::string Scene::GetName()
 
 Entity* Scene::CreateEntity()
 {
-	Entity* newEnt = new Entity();
+	Entity* newEnt = new Entity(gameData);
 	newEnt->GetTransform()->SetParent(transform);
 	return newEnt;
 }

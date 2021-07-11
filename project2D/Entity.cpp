@@ -1,8 +1,11 @@
 #include "Entity.h"
+#include "Component.h"
+#include "Transform.h"
 
-Entity::Entity()
+Entity::Entity(Game2D* gameData)
 {
 	transform = AddComponent<Transform>();
+	this->gameData = gameData;
 }
 
 Entity::~Entity()
@@ -10,7 +13,7 @@ Entity::~Entity()
 	int count = transform->GetChildCount();
 	for (int i = 0; i < count; ++i)
 	{
-		delete transform->GetChild(i);
+		delete transform->GetChild(i)->GetEntity();
 	}
 
 	for (auto& iterator : components)
@@ -25,9 +28,24 @@ Transform* Entity::GetTransform()
 	return transform;
 }
 
+Game2D* Entity::GetGameData()
+{
+	return gameData;
+}
+
 int Entity::GetComponentCount()
 {
 	return components.size();
+}
+
+Entity* Entity::Clone()
+{
+	Entity* newEnt = new Entity(this->gameData);
+	
+	for (const auto& component : components)
+	{
+		newEnt->components.insert({typeid(decltype(component.second)), new decltype(component.second)(component.second) });
+	}
 }
 
 void Entity::Start()
