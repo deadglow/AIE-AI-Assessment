@@ -39,7 +39,10 @@ namespace MathMan
 		{
 			return Vector2(this->x * scalar, this->y * scalar);
 		}
-
+		Vector2 operator -()
+		{
+			return Vector2(-this->x, -this->y);
+		}
 		Vector2& operator +=(Vector2 vec)
 		{
 			x = x + vec.x;

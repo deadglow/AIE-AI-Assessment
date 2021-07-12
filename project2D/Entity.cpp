@@ -85,14 +85,14 @@ void Entity::Update()
 	}
 }
 
-void Entity::OnCollision()
+void Entity::OnCollision(Collision collision)
 {
 	for (auto& iter : components)
-		iter.second->OnCollision();
+		iter.second->OnCollision(collision);
 
 	for (Transform* t : *transform->_GetChildrenList())
 	{
-		t->GetEntity()->OnCollision();
+		t->GetEntity()->OnCollision(collision);
 	}
 }
 
@@ -104,6 +104,16 @@ std::string Entity::GetName()
 void Entity::SetName(std::string newName)
 {
 	name = newName;
+}
+
+int Entity::GetLayer()
+{
+	return layer;
+}
+
+void Entity::SetLayer(int newLayer)
+{
+	layer = newLayer;
 }
 
 Entity* Entity::CreateEntity(Transform* parent)

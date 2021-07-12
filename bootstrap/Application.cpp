@@ -2,6 +2,7 @@
 #include "gl_core_4_4.h"
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <algorithm>
 
 namespace aie 
 {
@@ -44,7 +45,8 @@ void Application::Update()
 {
 	// Update delta time.
 	double currTime = GetTime();
-	m_deltaTime = currTime - m_prevTime;
+	m_unscaledDeltaTime = std::min((float)(currTime - m_prevTime), 1.0f);
+	m_deltaTime = m_unscaledDeltaTime * m_timeScale;
 	m_prevTime = currTime;
 
 	// Update fps every second.

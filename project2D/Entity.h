@@ -1,6 +1,5 @@
 #pragma once
-#include "Component.h"
-#include "Transform.h"
+#include "ComponentIncludes.h"
 #include <unordered_map>
 #include <string>
 #include <typeindex>
@@ -68,10 +67,13 @@ public:
 
 	void Update();
 
-	void OnCollision();
+	void OnCollision(Collision collision);
 
 	std::string GetName();
 	void SetName(std::string);
+
+	int GetLayer();
+	void SetLayer(int newLayer);
 
 	Entity* CreateEntity(Transform* transform);
 	Entity* CreateEntity();
@@ -79,6 +81,7 @@ public:
 protected:
 	Game2D* gameData;
 	std::string name;
+	int layer;
 	Transform* transform;
 	std::unordered_map<std::type_index, Component*> components;
 };

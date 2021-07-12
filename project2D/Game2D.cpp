@@ -37,26 +37,6 @@ aie::Texture* Game2D::GetTexture(std::string name)
 	return textures[name];
 }
 
-float Game2D::GetDeltaTime()
-{
-	return deltaTime;
-}
-
-float Game2D::GetUnscaledDeltaTime()
-{
-	return unscaledDeltaTime;
-}
-
-float Game2D::GetTimeScale()
-{
-	return timeScale;
-}
-
-void Game2D::SetTimeScale(float scale)
-{
-	timeScale = scale;
-}
-
 void Game2D::AddSpriteDrawCall(Sprite* sprite)
 {
 	sprites.push(sprite);
@@ -80,7 +60,12 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 	player->AddComponent<Sprite>();
 	player->GetComponent<Sprite>()->SetTexture(textures["block.png"]);
 
-
+	//Create upper body
+	Entity* newEnt = player->CreateEntity(player->GetTransform());
+	newEnt->AddComponent<Sprite>();
+	newEnt->GetComponent<Sprite>()->SetTexture(GetTexture("torso.png"));
+	newEnt->GetComponent<Sprite>()->SetDepth(-1.0f);
+	player->GetComponent<Player>()->SetTargeter(newEnt->GetTransform());
 }
 
 Game2D::~Game2D()
@@ -104,10 +89,6 @@ Game2D::~Game2D()
 void Game2D::Update(float deltaTime)
 {
 	aie::Input* input = aie::Input::GetInstance();
-	
-	//Update deltaTime
-	this->unscaledDeltaTime = deltaTime;
-	this->deltaTime = unscaledDeltaTime * timeScale;
 
 	// Exit the application if escape is pressed.
 	if (input->IsKeyDown(aie::INPUT_KEY_ESCAPE))
@@ -132,6 +113,12 @@ void Game2D::Update(float deltaTime)
 
 	if (input->IsKeyDown(aie::INPUT_KEY_D))
 		camPosX += 500.0f * deltaTime;
+
+	if (input->WasKeyPressed(aie::INPUT_KEY_C))
+	{
+		Entity* clone = player->Clone();
+		clone->GetTransform()->Translate(-Vector2::One() * 10.0f, false);
+	}
 
 	mainScene->Update();
 	mainScene->GetTransform()->UpdateGlobalMatrix();

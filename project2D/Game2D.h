@@ -29,18 +29,9 @@ public:
 
 	Scene* GetMainScene();
 
-	float GetDeltaTime();
-	float GetUnscaledDeltaTime();
-	float GetTimeScale();
-	void SetTimeScale(float scale);
-
 	void AddSpriteDrawCall(Sprite* sprite);
 
 protected:
-
-	float unscaledDeltaTime = 1.0f;
-	float deltaTime = 1.0f;
-	float timeScale = 1.0f;
 	MathMan::Vector2 mousePos;
 
 	aie::Renderer2D* m_2dRenderer;

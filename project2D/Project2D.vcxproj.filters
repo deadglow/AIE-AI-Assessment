@@ -19,15 +19,24 @@
     <Filter Include="Source Files\Components">
       <UniqueIdentifier>{591f7b1b-6983-4e30-adc8-05ec8b79a77a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\MathMan">
+      <UniqueIdentifier>{a4d872af-601f-4477-bf52-e5f7595926cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MathMan">
+      <UniqueIdentifier>{7fab43e1-3ecb-4ca1-9f77-ea16e39ff1cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Components\Collision">
+      <UniqueIdentifier>{9f25c097-1a53-4d33-913b-f852f6a684ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Components\Collision">
+      <UniqueIdentifier>{58bf1eee-5999-43f4-9e93-d5df515ec8f3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Game2D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Matrix3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Entity.cpp">
@@ -48,18 +57,27 @@
     <ClCompile Include="Transform.cpp">
       <Filter>Source Files\Components</Filter>
     </ClCompile>
+    <ClCompile Include="PhysObject.cpp">
+      <Filter>Source Files\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Matrix3.cpp">
+      <Filter>Source Files\MathMan</Filter>
+    </ClCompile>
+    <ClCompile Include="Collider.cpp">
+      <Filter>Source Files\Components\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionManager.cpp">
+      <Filter>Source Files\Components\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="ColliderPolygon.cpp">
+      <Filter>Source Files\Components\Collision</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Entity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Matrix3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Vector2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
@@ -76,6 +94,30 @@
     </ClInclude>
     <ClInclude Include="Sprite.h">
       <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysObject.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Collision.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector2.h">
+      <Filter>Header Files\MathMan</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrix3.h">
+      <Filter>Header Files\MathMan</Filter>
+    </ClInclude>
+    <ClInclude Include="ComponentIncludes.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionManager.h">
+      <Filter>Header Files\Components\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Collider.h">
+      <Filter>Header Files\Components\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="ColliderPolygon.h">
+      <Filter>Header Files\Components\Collision</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

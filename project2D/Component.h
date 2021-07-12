@@ -1,5 +1,6 @@
 #pragma once
 #include "Game2D.h"
+#include "Collision.h"
 
 class Entity;
 
@@ -13,7 +14,7 @@ public:
 
 	virtual void Start() {};
 	virtual void Update() {};
-	virtual void OnCollision() {};
+	virtual void OnCollision(Collision collision) {};
 	virtual void OnDestroy() {};
 	virtual Component* CloneTo(Entity* ent) = 0;
 	

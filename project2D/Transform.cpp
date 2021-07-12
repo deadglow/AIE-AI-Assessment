@@ -1,17 +1,13 @@
 #include "Transform.h"
 #include "Entity.h"
 
-Transform::~Transform()
-{
-	
-}
-
 Transform* Transform::CloneTo(Entity* ent)
 {
 	//Don't clone, just copy data since transform already exists
 	Transform* newTransform = ent->GetTransform();
 	newTransform->localTransform = this->localTransform;
-	newTransform->parent = this->parent;
+	newTransform->globalTransform = this->globalTransform;
+	newTransform->SetParent(this->parent);
 
 	return newTransform;
 }
@@ -119,7 +115,6 @@ float Transform::GetGlobalRotation()
 
 void Transform::SetGlobalRotation(float radians)
 {
-
 	SetLocalRotation(-parent->GetGlobalRotation() + radians);
 }
 

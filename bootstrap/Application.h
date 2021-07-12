@@ -3,7 +3,7 @@
 // using GLFW and OpenGL and manages the general state of the application.
 //----------------------------------------------------------------------------
 #pragma once
-
+#include <cmath>
 // Forward declared structure for access to GLFW window.
 struct GLFWwindow;
 
@@ -52,6 +52,10 @@ public:
 	// Time related functions.
 	float GetTime() const;
 	float GetDeltaTime() const { return (float)m_deltaTime; }
+	float GetUnscaledDeltaTime() const { return (float)m_unscaledDeltaTime; }
+	float GetTimeScale() const { return (float)m_timeScale; }
+	void SetTimeScale(double ts) { m_timeScale = ts; }
+
 	unsigned int GetFPS() const { return m_fps; }
 
 private:
@@ -82,6 +86,8 @@ private:
 
 	// Calculating framerate.
 	double m_prevTime;
+	double m_timeScale = 1.0;
+	double m_unscaledDeltaTime;
 	double m_deltaTime;
 	unsigned int m_fps;
 	unsigned int m_frames;

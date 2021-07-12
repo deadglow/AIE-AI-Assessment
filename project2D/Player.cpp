@@ -5,19 +5,6 @@
 #include "Entity.h"
 #include "Sprite.h"
 
-Player::Player(Entity* ent) : Component::Component(ent)
-{
-	//Create upper body
-	Entity* newEnt = entity->CreateEntity(entity->GetTransform());
-	newEnt->AddComponent<Sprite>();
-	newEnt->GetComponent<Sprite>()->SetTexture(entity->GetGameData()->GetTexture("torso.png"));
-
-	newEnt->GetComponent<Sprite>()->SetDepth(-1.0f);
-
-	targeter = newEnt->GetTransform();
-
-}
-
 Player::~Player()
 {
 
@@ -25,17 +12,17 @@ Player::~Player()
 
 Player* Player::CloneTo(Entity* ent)
 {
-	Player* newPlayer = ent->AddComponent<Player>();
-	//do this
-	return newPlayer;
+	Player* player = ent->AddComponent<Player>();
+	player->speed = this->speed;
+	player->targeter = player->GetEntity()->GetTransform()->GetChild(0);
+	return player;
 }
 
 void Player::Update()
 {
 	// Update input for the player.
 	aie::Input* input = aie::Input::GetInstance();
-
-	float deltaTime = entity->GetGameData()->GetDeltaTime();
+	float deltaTime = aie::Application::GetInstance()->GetDeltaTime();
 
 	Vector2 inputVec = { 0, 0 };
 	if (input->IsKeyDown(aie::INPUT_KEY_LEFT))
@@ -65,5 +52,12 @@ void Player::Update()
 	targeter->LookAt(point);
 
 	transform->Translate(inputVec * speed * deltaTime, true);
+	transform->Rotate(90.0f * DEG2RAD * deltaTime);
+	transform->SetLocalScale(transform->GetLocalScale() + Vector2::One() * inputVec.y * deltaTime);
 	
+}
+
+void Player::SetTargeter(Transform* t)
+{
+	targeter = t;
 }
