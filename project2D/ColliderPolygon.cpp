@@ -4,7 +4,7 @@
 
 ColliderPolygon::ColliderPolygon(Entity* ent) : Collider::Collider(ent)
 {
-
+	pointCount = 0;
 }
 
 ColliderPolygon::~ColliderPolygon()
@@ -51,7 +51,7 @@ void ColliderPolygon::AssignPoints(Vector2* pointArray, int pointCount)
 	this->pointCount = pointCount;
 }
 
-ColliderType ColliderPolygon::GetColliderType()
+Collider::ColliderType ColliderPolygon::GetColliderType()
 {
-	return ColliderType::Polygon;
+	return Collider::ColliderType::Polygon;
 }

@@ -3,16 +3,16 @@
 
 class PhysObject;
 
-enum ColliderType : int
-{
-	Default,
-	Polygon,
-	Circle
-};
-
 class Collider : public Component
 {
 public:
+	enum class ColliderType
+	{
+		Default,
+		Polygon,
+		Circle
+	};
+
 	Collider(Entity* ent);
 
 	Collider* CloneTo(Entity* ent);
@@ -21,7 +21,7 @@ public:
 	void SetStatic(bool value);
 	float GetRestitution();
 	void SetRestitution(float value);
-	virtual ColliderType GetColliderType() = 0;
+	virtual ColliderType GetColliderType();
 
 protected:
 	bool isStatic = false;

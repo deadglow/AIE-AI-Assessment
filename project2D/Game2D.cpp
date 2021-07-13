@@ -7,6 +7,7 @@
 #include "Texture.h"
 #include "Font.h"
 #include "Input.h"
+#include "CollisionManager.h"
 #include "Scene.h"
 #include "Entity.h"
 #include "Sprite.h"
@@ -47,6 +48,8 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 {
 	// Initalise the 2D renderer.
 	m_2dRenderer = new aie::Renderer2D();
+
+	collisionManager = new CollisionManager();
 
 	LoadTextures();
 
@@ -121,6 +124,8 @@ void Game2D::Update(float deltaTime)
 	}
 
 	mainScene->Update();
+	mainScene->GetTransform()->UpdateGlobalMatrix();
+	collisionManager->CheckCollisions();
 	mainScene->GetTransform()->UpdateGlobalMatrix();
 
 	m_2dRenderer->SetCameraPos(camPosX, camPosY);

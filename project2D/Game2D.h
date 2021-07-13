@@ -11,6 +11,7 @@
 class Sprite;
 class Scene;
 class Entity;
+class CollisionManager;
 
 class Game2D : public aie::Game
 {
@@ -32,15 +33,14 @@ public:
 	void AddSpriteDrawCall(Sprite* sprite);
 
 protected:
-	MathMan::Vector2 mousePos;
-
 	aie::Renderer2D* m_2dRenderer;
 
-	aie::Font* m_font;
+	CollisionManager* collisionManager;
 
 	Scene* mainScene;
 	Entity* player;
 	
+	aie::Font* m_font;
 	std::map<std::string, aie::Texture*> textures;
 	std::queue<Sprite*> sprites;
 };

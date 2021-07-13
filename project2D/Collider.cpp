@@ -35,3 +35,8 @@ void Collider::SetRestitution(float value)
 {
 	restitution = value;
 }
+
+Collider::ColliderType Collider::GetColliderType()
+{
+	return Collider::ColliderType::Default;
+}

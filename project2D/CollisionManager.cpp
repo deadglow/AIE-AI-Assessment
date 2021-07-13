@@ -18,10 +18,12 @@ void CollisionManager::CheckCollisions()
 	
 	while (iterator != colliders.end())
 	{
+		//Create iterator starting at next element from current iterator
 		auto subIterator = iterator;
 		subIterator++;
 		while (subIterator != colliders.end())
 		{
+			//Dereference iterators to get colliders
 			Collider* a = *iterator;
 			Collider* b = *subIterator;
 
@@ -36,23 +38,90 @@ void CollisionManager::CheckCollisions()
 			bool collided = false;
 
 			//Check for collisions and assign to resolveDistance
-			//
+			if (a->GetColliderType() == b->GetColliderType())
+			{
+				if (a->GetColliderType() == Collider::ColliderType::Polygon)
+				{
+					//Test polygons
+					Vector2 vecAB, vecBA;
+					float resolveAB, resolveBA;
+					//Assign values to the smallest resolve values
+					if (TestPolygons((ColliderPolygon*)a, (ColliderPolygon*)b, vecAB, resolveAB, false) && TestPolygons((ColliderPolygon*)b, (ColliderPolygon*)b, vecBA, resolveBA, true))
+					{
+						collided = true;
+						if (abs(resolveAB) < abs(resolveBA))
+						{
+							resolveVector = vecAB;
+							resolveDistance = resolveAB;
+						}
+						else
+						{
+							resolveVector = vecBA;
+							resolveDistance = resolveBA;
+						}
+					}
+				}
+				else
+				{
+					if (TestCircles((ColliderCircle*)a, (ColliderCircle*)b, resolveVector, resolveDistance))
+					{
+						collided = true;
+					}
+				}
+			}
+			else
+			{
+				if (a->GetColliderType() == Collider::ColliderType::Circle)
+				{
+					//TestCircleToPolygon(a, b)
+				}
+				else
+				{
+					//TestCircleToPolygon(b, a)
+				}
+			}
 
+			if (collided)
+			{
+				float restitution = (a->GetRestitution() + b->GetRestitution()) * 0.5f;
 
+				//Generate collision
+				Collision col = Collision();
+				col.other = b;
+				col.resolveVector = resolveVector;
+				col.resolveDistance = resolveDistance;
+				col.relativePosition = a->GetEntity()->GetTransform()->GetGlobalPosition() - b->GetEntity()->GetTransform()->GetGlobalPosition();
+				col.finalRestitution = restitution;
+
+				//Pass collision to collider a
+				a->GetEntity()->OnCollision(col);
+
+				//Swap values for b and flip necessary values for b
+				col.other = a;
+				col.resolveVector = -resolveVector;
+				col.relativePosition = -col.relativePosition;
+
+				//Pass collision to collider b
+				b->GetEntity()->OnCollision(col);
+			}
+			//Go to next element
 			subIterator++;
 		}
-
+		//Go to next element
 		iterator++;
 	}
 }
 
 Vector2 CollisionManager::ProjectVertsMinMax(Vector2 axis, Vector2* verts, int vertCount)
 {
+	//Get base minMax
 	Vector2 minMax = Vector2();
 	minMax.x = Vector2::Dot(axis, verts[0]);
 	minMax.y = minMax.x;
 
 	float dot;
+
+	//Go through all vertices, project them and override min if value is smaller, or override max if value is higher
 	for (int i = 1; i < vertCount; ++i)
 	{
 		dot = Vector2::Dot(axis, verts[i]);
@@ -108,9 +177,7 @@ bool CollisionManager::TestPolygons(ColliderPolygon* a, ColliderPolygon* b, Vect
 
 		//Try swap these some time
 		minDist = -(aMinMax.y - bMinMax.x);
-		if (flipResults)
-			minDist = -minDist;
-
+	
 		minDistAbs = abs(minDist);
 
 		if (minDistAbs < shortestDistance)
@@ -120,9 +187,53 @@ bool CollisionManager::TestPolygons(ColliderPolygon* a, ColliderPolygon* b, Vect
 			resolveDistance = minDist;
 			resolveVector = axis;
 		}
+	}
 
-		resolveVector *= resolveDistance;
+	if (flipResults)
+		resolveDistance = -resolveDistance;
+
+	//Finally turn the vector into big man, so distance doesn't have to be calculated every time
+	resolveVector *= resolveDistance;
+
+	//Clear memory
+	delete[] aVerts;
+	delete[] bVerts;
+
+	return true;
+}
+
+bool CollisionManager::TestCircles(ColliderCircle* a, ColliderCircle* b, Vector2& resolveVector, float& resolveDistance, bool flipResults)
+{
+	resolveVector = Vector2();
+	resolveDistance = 0.0f;
+
+	//Get b - a
+	Vector2 abOffset = a->GetEntity()->GetTransform()->GetGlobalPosition() - b->GetEntity()->GetTransform()->GetGlobalPosition();
+	
+	float distance = abOffset.Magnitude();
+
+	float combinedRadius= a->GetTransformedRadius() + b->GetTransformedRadius();
+
+	//If combined radius is larger than the distance, then circles must be overlapping
+	if (distance < combinedRadius)
+	{
+		//Difference between the total radius and distance is the amount needed to get outta there
+		resolveDistance = combinedRadius - distance;
+
+		//Divide by zero is bad so just make a unit vector going up
+		if (distance == 0)
+		{
+			resolveVector = Vector2::Up();
+			distance = 1.0f;
+		}
+
+		if (flipResults)
+			resolveDistance = -resolveDistance;
+
+		resolveVector = abOffset * resolveDistance / -distance;
 
 		return true;
 	}
+
+	return false;
 }

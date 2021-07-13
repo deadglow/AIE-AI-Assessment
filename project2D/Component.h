@@ -8,7 +8,7 @@ class Component
 {
 public:
 	Component(Entity* entity);
-	~Component() {};
+	virtual ~Component() {};
 	
 	Entity* GetEntity();
 

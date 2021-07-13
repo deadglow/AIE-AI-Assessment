@@ -3,5 +3,7 @@
 #include "Transform.h"
 #include "Sprite.h"
 #include "PhysObject.h"
-#include "Player.h"
 #include "ColliderPolygon.h"
+#include "ColliderBox.h"
+#include "ColliderCircle.h"
+#include "Player.h"

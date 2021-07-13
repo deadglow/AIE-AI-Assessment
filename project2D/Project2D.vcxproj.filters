@@ -72,6 +72,12 @@
     <ClCompile Include="ColliderPolygon.cpp">
       <Filter>Source Files\Components\Collision</Filter>
     </ClCompile>
+    <ClCompile Include="ColliderCircle.cpp">
+      <Filter>Source Files\Components\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="ColliderBox.cpp">
+      <Filter>Source Files\Components\Collision</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game2D.h">
@@ -98,9 +104,6 @@
     <ClInclude Include="PhysObject.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
-    <ClInclude Include="Collision.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Vector2.h">
       <Filter>Header Files\MathMan</Filter>
     </ClInclude>
@@ -117,6 +120,15 @@
       <Filter>Header Files\Components\Collision</Filter>
     </ClInclude>
     <ClInclude Include="ColliderPolygon.h">
+      <Filter>Header Files\Components\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="ColliderCircle.h">
+      <Filter>Header Files\Components\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="ColliderBox.h">
+      <Filter>Header Files\Components\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Collision.h">
       <Filter>Header Files\Components\Collision</Filter>
     </ClInclude>
   </ItemGroup>
