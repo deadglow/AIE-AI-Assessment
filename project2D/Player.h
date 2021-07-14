@@ -15,6 +15,7 @@ public:
 	Player* CloneTo(Entity* ent) override;
 
 	void Update() override;
+	void OnCollision(Collision collision) override;
 
 	void SetTargeter(Transform* t);
 

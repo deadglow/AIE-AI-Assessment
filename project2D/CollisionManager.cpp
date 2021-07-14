@@ -46,7 +46,7 @@ void CollisionManager::CheckCollisions()
 					Vector2 vecAB, vecBA;
 					float resolveAB, resolveBA;
 					//Assign values to the smallest resolve values
-					if (TestPolygons((ColliderPolygon*)a, (ColliderPolygon*)b, vecAB, resolveAB, false) && TestPolygons((ColliderPolygon*)b, (ColliderPolygon*)b, vecBA, resolveBA, true))
+					if (TestPolygons((ColliderPolygon*)a, (ColliderPolygon*)b, vecAB, resolveAB, false) && TestPolygons((ColliderPolygon*)b, (ColliderPolygon*)a, vecBA, resolveBA, true))
 					{
 						collided = true;
 						if (abs(resolveAB) < abs(resolveBA))
@@ -159,7 +159,7 @@ bool CollisionManager::TestPolygons(ColliderPolygon* a, ColliderPolygon* b, Vect
 	for (int i = 0; i < aVertCount; ++i)
 	{
 		//Get normal of the side generated from current point to next point
-		axis = (aVerts[(i + 1) & aVertCount] - aVerts[i]).RightAngle().Normalised();
+		axis = (aVerts[(i + 1) % aVertCount] - aVerts[i]).RightAngle().Normalised();
 
 		//Gets the minimum and maximum values of the points of each object being projected on the axis
 		//x min, y max
@@ -173,10 +173,17 @@ bool CollisionManager::TestPolygons(ColliderPolygon* a, ColliderPolygon* b, Vect
 
 		//No collision detected since a gap was detected
 		if (aMinMax.x - bMinMax.y > 0 || bMinMax.x - aMinMax.y > 0)
+		{
+			//Clear memory
+			delete[] aVerts;
+			delete[] bVerts;
 			return false;
+		}
 
 		//Try swap these some time
 		minDist = -(aMinMax.y - bMinMax.x);
+		if (flipResults)
+			minDist = -minDist;
 	
 		minDistAbs = abs(minDist);
 
@@ -188,9 +195,6 @@ bool CollisionManager::TestPolygons(ColliderPolygon* a, ColliderPolygon* b, Vect
 			resolveVector = axis;
 		}
 	}
-
-	if (flipResults)
-		resolveDistance = -resolveDistance;
 
 	//Finally turn the vector into big man, so distance doesn't have to be calculated every time
 	resolveVector *= resolveDistance;
@@ -236,4 +240,12 @@ bool CollisionManager::TestCircles(ColliderCircle* a, ColliderCircle* b, Vector2
 	}
 
 	return false;
+}
+
+void CollisionManager::DrawColliders(aie::Renderer2D* renderer)
+{
+	for (Collider* col : colliders)
+	{
+		col->Draw(renderer);
+	}
 }

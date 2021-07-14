@@ -2,6 +2,7 @@
 
 void ColliderBox::GenerateBox(Vector2 halfExtents)
 {
+	pointCount = 4;
 	this->halfExtents = halfExtents;
 
 	points = new Vector2[4]();

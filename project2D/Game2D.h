@@ -29,6 +29,7 @@ public:
 	aie::Texture* GetTexture(std::string name);
 
 	Scene* GetMainScene();
+	CollisionManager* GetCollisionManager();
 
 	void AddSpriteDrawCall(Sprite* sprite);
 
@@ -36,6 +37,7 @@ protected:
 	aie::Renderer2D* m_2dRenderer;
 
 	CollisionManager* collisionManager;
+	bool drawColliders = false;
 
 	Scene* mainScene;
 	Entity* player;

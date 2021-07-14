@@ -5,7 +5,7 @@ class ColliderPolygon :
 {
 public:
 	ColliderPolygon(Entity* ent);
-	~ColliderPolygon();
+	virtual ~ColliderPolygon();
 
 	int GetPointCount();
 
@@ -17,6 +17,8 @@ public:
 	void AssignPoints(Vector2* pointsArray, int pointCount);
 
 	ColliderType GetColliderType() override;
+
+	void Draw(aie::Renderer2D* renderer) override;
 
 protected:
 	Vector2* points;

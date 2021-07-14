@@ -90,10 +90,10 @@ void Entity::OnCollision(Collision collision)
 	for (auto& iter : components)
 		iter.second->OnCollision(collision);
 
-	for (Transform* t : *transform->_GetChildrenList())
+	/*for (Transform* t : *transform->_GetChildrenList())
 	{
 		t->GetEntity()->OnCollision(collision);
-	}
+	}*/
 }
 
 std::string Entity::GetName()

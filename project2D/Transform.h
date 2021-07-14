@@ -10,6 +10,8 @@ class Transform : public Component
 public:
 	using Component::Component;
 
+	~Transform() {};
+
 	Transform* CloneTo(Entity* ent) override;
 
 	Transform* GetParent();

@@ -5,6 +5,7 @@ class ColliderBox :
 {
 public:
 	using ColliderPolygon::ColliderPolygon;
+	~ColliderBox() {}
 
 	void GenerateBox(Vector2 halfExtents);
 	Vector2 GetHalfExtents();

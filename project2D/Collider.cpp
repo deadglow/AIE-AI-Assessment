@@ -1,9 +1,16 @@
 #include "Collider.h"
 #include "Entity.h"
+#include "CollisionManager.h"
 
 Collider::Collider(Entity* ent) : Component::Component(ent)
 {
 	attachedPhysObject = ent->GetComponent<PhysObject>();
+	ent->GetGameData()->GetCollisionManager()->AddCollider(this);
+}
+
+Collider::~Collider()
+{
+	entity->GetGameData()->GetCollisionManager()->RemoveCollider(this);
 }
 
 Collider* Collider::CloneTo(Entity* ent)

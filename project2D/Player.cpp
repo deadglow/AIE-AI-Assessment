@@ -52,12 +52,18 @@ void Player::Update()
 	targeter->LookAt(point);
 
 	transform->Translate(inputVec * speed * deltaTime, true);
-	transform->Rotate(90.0f * DEG2RAD * deltaTime);
-	transform->SetLocalScale(transform->GetLocalScale() + Vector2::One() * inputVec.y * deltaTime);
+	//transform->Rotate(90.0f * DEG2RAD * deltaTime);
 	
 }
 
 void Player::SetTargeter(Transform* t)
 {
 	targeter = t;
+}
+
+void Player::OnCollision(Collision collision)
+{
+	
+	//Get outta there
+	entity->GetTransform()->Translate(collision.resolveVector, true);
 }

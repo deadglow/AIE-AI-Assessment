@@ -11,6 +11,8 @@ class PhysObject : public Component
 public:
 	using Component::Component;
 
+	~PhysObject() {};
+
 	PhysObject* CloneTo(Entity* ent);
 
 	void OnCollision(Collision collision) override;

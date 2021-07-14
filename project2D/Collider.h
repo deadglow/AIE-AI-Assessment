@@ -14,6 +14,7 @@ public:
 	};
 
 	Collider(Entity* ent);
+	virtual ~Collider();
 
 	Collider* CloneTo(Entity* ent);
 
@@ -22,6 +23,8 @@ public:
 	float GetRestitution();
 	void SetRestitution(float value);
 	virtual ColliderType GetColliderType();
+
+	virtual void Draw(aie::Renderer2D* renderer) {};
 
 protected:
 	bool isStatic = false;

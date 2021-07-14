@@ -23,6 +23,11 @@ Scene* Game2D::GetMainScene()
 	return mainScene;
 }
 
+CollisionManager* Game2D::GetCollisionManager()
+{
+	return collisionManager;
+}
+
 void Game2D::LoadTextures()
 {
 	std::string path = "../bin/textures/";
@@ -59,22 +64,37 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 
 	//Player
 	player = mainScene->CreateEntity();
+	aie::Texture* tex = GetTexture("block.png");
 	player->AddComponent<Player>();
 	player->AddComponent<Sprite>();
-	player->GetComponent<Sprite>()->SetTexture(textures["block.png"]);
+	player->GetComponent<Sprite>()->SetTexture(tex);
+	player->AddComponent<ColliderBox>();
+	player->GetComponent<ColliderBox>()->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
+	player->GetTransform()->Rotate(1.3f);
 
-	//Create upper body
-	Entity* newEnt = player->CreateEntity(player->GetTransform());
+	////Create upper body
+	Entity* newEnt = mainScene->CreateEntity(player->GetTransform());
 	newEnt->AddComponent<Sprite>();
 	newEnt->GetComponent<Sprite>()->SetTexture(GetTexture("torso.png"));
 	newEnt->GetComponent<Sprite>()->SetDepth(-1.0f);
 	player->GetComponent<Player>()->SetTargeter(newEnt->GetTransform());
+
+	////Create wall
+	Entity* newWall = mainScene->CreateEntity();
+	newWall->AddComponent<Sprite>();
+	tex = GetTexture("grass.png");
+	newWall->GetComponent<Sprite>()->SetTexture(tex);
+	newWall->AddComponent<ColliderBox>();
+	newWall->GetComponent<ColliderBox>()->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
+	newWall->GetTransform()->SetLocalPosition(Vector2( 500.0f, 500.0f ));
 }
 
 Game2D::~Game2D()
 {
 	// Delete scene
 	delete mainScene;
+
+	delete collisionManager;
 
 	// Deleted the textures.
 	delete m_font;
@@ -123,6 +143,9 @@ void Game2D::Update(float deltaTime)
 		clone->GetTransform()->Translate(-Vector2::One() * 10.0f, false);
 	}
 
+	if (input->WasKeyPressed(aie::INPUT_KEY_B))
+		drawColliders = !drawColliders;
+
 	mainScene->Update();
 	mainScene->GetTransform()->UpdateGlobalMatrix();
 	collisionManager->CheckCollisions();
@@ -150,6 +173,12 @@ void Game2D::Draw()
 		sprites.front()->Draw();
 		sprites.pop();
 	}
+
+	if (drawColliders)
+	{
+		m_2dRenderer->SetRenderColour(0.0f, 1.0f, 0.0f);
+		collisionManager->DrawColliders(m_2dRenderer);
+	}
 	
 	// Draw some text.
 	m_2dRenderer->SetRenderColour(1.0f, 1.0f, 1.0f, 1.0f);
@@ -157,9 +186,6 @@ void Game2D::Draw()
 	char fps[32];
 	sprintf_s(fps, 32, "FPS: %i", application->GetFPS());
 	m_2dRenderer->DrawText2D(m_font, fps, 15.0f, windowHeight - 32.0f);
-	m_2dRenderer->DrawText2D(m_font, "Arrow keys to move.", 15.0f, windowHeight - 64.0f);
-	m_2dRenderer->DrawText2D(m_font, "WASD to move camera.", 15.0f, windowHeight - 96.0f);
-	m_2dRenderer->DrawText2D(m_font, "Press ESC to quit!", 15.0f, windowHeight - 128.0f);
 
 	// Done drawing sprites. Must be called at the end of the Draw().
 	m_2dRenderer->End();

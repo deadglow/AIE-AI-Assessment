@@ -8,6 +8,8 @@ class Sprite : public Component
 public:
 	using Component::Component;
 
+	~Sprite() {};
+
 	Sprite* CloneTo(Entity* ent) override;
 	
 	void Update() override;
