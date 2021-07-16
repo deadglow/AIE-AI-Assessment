@@ -155,18 +155,23 @@ void Transform::Rotate(float radians)
 	localTransform = localTransform * rotMat;
 }
 
-void Transform::LookAt(Vector2 point)
+void Transform::SetUp(Vector2 direction)
 {
-	Vector2 objectToMouse = point - GetGlobalPosition();
-
-	objectToMouse = objectToMouse.Normalised();
-
-	float newRotation = atan2(objectToMouse.y, objectToMouse.x);
+	float newRotation = atan2(direction.y, direction.x);
 
 	if (isnan<float>(newRotation))
 		newRotation = 0;
 
 	SetGlobalRotation(newRotation);
+}
+
+void Transform::LookAt(Vector2 point)
+{
+	Vector2 objectToPoint = point - GetGlobalPosition();
+
+	objectToPoint = objectToPoint.Normalised();
+
+	SetUp(objectToPoint);
 }
 
 void Transform::UpdateGlobalMatrix()

@@ -7,6 +7,8 @@ public:
 	ColliderPolygon(Entity* ent);
 	virtual ~ColliderPolygon();
 
+	virtual ColliderPolygon* CloneTo(Entity* ent) override;
+
 	int GetPointCount();
 
 	//Creates memory! Outputs array of points transformed by this object's transform

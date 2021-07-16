@@ -2,6 +2,7 @@
 #include <functional>
 #include "Component.h"
 #include "Renderer2D.h"
+#include "Animation.h"
 
 class Sprite : public Component
 {
@@ -15,8 +16,8 @@ public:
 	void Update() override;
 	void Draw();
 
-	aie::Texture* GetTexture();
-	void SetTexture(aie::Texture* tex);
+	Animation* GetAnimation();
+	void SetAnimation(Animation* tex);
 
 	float GetRotation();
 	void SetRotation(float rotation);
@@ -33,7 +34,10 @@ public:
 	void SetFlipX(bool flip);
 	void SetFlipY(bool flip);
 protected:
-	aie::Texture* tex;
+	Animation* anim;
+	int frameIndex;
+	float frameRate;
+	float frameTimer;
 	float rotation = 0.0f;
 	float depth = 0.0f;
 	unsigned int tint = UINT32_MAX;

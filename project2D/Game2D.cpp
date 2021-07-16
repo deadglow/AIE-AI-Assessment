@@ -64,7 +64,7 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 
 	//Player
 	player = mainScene->CreateEntity();
-	aie::Texture* tex = GetTexture("block.png");
+	aie::Texture* tex = GetTexture("legs.png");
 	player->AddComponent<Player>();
 	player->AddComponent<Sprite>();
 	player->GetComponent<Sprite>()->SetTexture(tex);
@@ -86,7 +86,25 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 	newWall->GetComponent<Sprite>()->SetTexture(tex);
 	newWall->AddComponent<ColliderBox>();
 	newWall->GetComponent<ColliderBox>()->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
+	newWall->GetComponent<ColliderBox>()->SetStatic(true);
 	newWall->GetTransform()->SetLocalPosition(Vector2( 500.0f, 500.0f ));
+
+	//Create thing
+	newWall = mainScene->CreateEntity();
+	newWall->AddComponent<Sprite>();
+	tex = GetTexture("grass.png");
+	newWall->GetComponent<Sprite>()->SetTexture(tex);
+	PhysObject* phys = newWall->AddComponent<PhysObject>();
+	newWall->AddComponent<ColliderBox>();
+	newWall->GetComponent<ColliderBox>()->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
+	newWall->GetComponent<ColliderBox>()->SetRestitution(0.4f);
+	
+	newWall->GetTransform()->SetLocalPosition(Vector2(200.0f, 200.0f));
+
+	newWall->Clone();
+	newWall->Clone();
+	newWall->Clone();
+
 }
 
 Game2D::~Game2D()
@@ -125,6 +143,10 @@ void Game2D::Update(float deltaTime)
 
 	m_2dRenderer->GetCameraPos(camPosX, camPosY);
 
+	Vector2 mousePos = { (float)input->GetMouseX(), (float)input->GetMouseY() };
+
+	mousePos += {camPosX, camPosY};
+
 	if (input->IsKeyDown(aie::INPUT_KEY_W))
 		camPosY += 500.0f * deltaTime;
 
@@ -141,10 +163,51 @@ void Game2D::Update(float deltaTime)
 	{
 		Entity* clone = player->Clone();
 		clone->GetTransform()->Translate(-Vector2::One() * 10.0f, false);
+		clone->GetComponent<Player>()->SetTargeter(clone->GetTransform()->GetChild(0));
 	}
 
 	if (input->WasKeyPressed(aie::INPUT_KEY_B))
 		drawColliders = !drawColliders;
+
+	//Drag dudes
+	if (input->IsMouseButtonDown(aie::INPUT_MOUSE_BUTTON_LEFT))
+	{
+		if (physTarget == nullptr)
+		{
+			float dist = 30.0f;
+
+			physTarget = nullptr;
+
+			for (auto& child : *mainScene->GetTransform()->_GetChildrenList())
+			{
+				PhysObject* phys = child->GetEntity()->GetComponent<PhysObject>();
+
+				if (phys != nullptr)
+				{
+					float newDist = (child->GetGlobalPosition() - mousePos).Magnitude();
+					if (newDist < dist)
+					{
+						physTarget = phys;
+						dist = newDist;
+					}
+				}
+			}
+		}
+		else
+		{
+			Vector2 vec = mousePos - physTarget->GetEntity()->GetTransform()->GetGlobalPosition();
+			float mag = vec.Magnitude();
+			if (mag > 0)
+			{
+				vec /= mag;
+				physTarget->AddForce(vec * 300.0f * deltaTime);
+			}
+		}
+	}
+	else
+	{
+		physTarget = nullptr;
+	}
 
 	mainScene->Update();
 	mainScene->GetTransform()->UpdateGlobalMatrix();

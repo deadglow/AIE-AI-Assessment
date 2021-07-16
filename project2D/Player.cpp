@@ -14,7 +14,6 @@ Player* Player::CloneTo(Entity* ent)
 {
 	Player* player = ent->AddComponent<Player>();
 	player->speed = this->speed;
-	player->targeter = player->GetEntity()->GetTransform()->GetChild(0);
 	return player;
 }
 
@@ -22,7 +21,10 @@ void Player::Update()
 {
 	// Update input for the player.
 	aie::Input* input = aie::Input::GetInstance();
-	float deltaTime = aie::Application::GetInstance()->GetDeltaTime();
+	aie::Application* app = aie::Application::GetInstance();
+	float deltaTime = app->GetDeltaTime();
+
+	Transform* transform = entity->GetTransform();
 
 	Vector2 inputVec = { 0, 0 };
 	if (input->IsKeyDown(aie::INPUT_KEY_LEFT))
@@ -43,17 +45,20 @@ void Player::Update()
 	}
 
 	if (inputVec.SqrMagnitude() > 0)
+	{
 		inputVec = inputVec.Normalised();
+		transform->SetUp(inputVec);
+	}
 
-	Transform* transform = entity->GetTransform();
+
+	//Torso direction
 
 	Vector2 point = { (float)input->GetMouseX(), (float)input->GetMouseY() };
+	Vector2 centre = Vector2((float)app->GetWindowWidth(), (float)app->GetWindowHeight()) / 2;
 
-	targeter->LookAt(point);
+	targeter->SetUp((point - centre).Normalised());
 
 	transform->Translate(inputVec * speed * deltaTime, true);
-	//transform->Rotate(90.0f * DEG2RAD * deltaTime);
-	
 }
 
 void Player::SetTargeter(Transform* t)

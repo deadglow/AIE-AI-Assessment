@@ -4,6 +4,7 @@
 #include "Collider.h"
 #include "ColliderPolygon.h"
 #include "ColliderCircle.h"
+#include "Rayhit.h"
 
 class CollisionManager
 {
@@ -18,8 +19,11 @@ public:
 	void CheckCollisions();
 
 	//Test two polygons
-	bool TestPolygons(ColliderPolygon* a, ColliderPolygon* b, Vector2& resolveVector, float& resolveDistance, bool flipResults = true);
-	bool TestCircles(ColliderCircle* a, ColliderCircle* b, Vector2& resolveVector, float& resolveDistance, bool flipResults = true);
+	bool TestPolygons(ColliderPolygon* a, ColliderPolygon* b, Vector2& resolveVector, float& resolveDistance, bool flipResults);
+	bool TestCircles(ColliderCircle* a, ColliderCircle* b, Vector2& resolveVector, float& resolveDistance, bool flipResults);
+	bool TestPolygonToCircle(ColliderPolygon* poly, ColliderCircle* circ, Vector2& resolveVector, float& resolveDistance, bool flipResults);
+	bool RayCast(Vector2 origin, Vector2 direction, float maxDistance, RayHit& rayHit);
+	bool RayCastToPolygon(ColliderPolygon* collider, Vector2 origin, Vector2 direction, float maxDistance, RayHit& rayHit);
 
 	void DrawColliders(aie::Renderer2D* renderer);
 protected:

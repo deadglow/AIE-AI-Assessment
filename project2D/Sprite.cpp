@@ -1,11 +1,12 @@
 #include "Sprite.h"
 #include "Entity.h"
+#include "Application.h"
 
 Sprite* Sprite::CloneTo(Entity* ent)
 {
 	//Copy all this shiiiiii
 	Sprite* newSprite = ent->AddComponent<Sprite>();
-	newSprite->tex = this->tex;
+	newSprite->anim = this->anim;
 	newSprite->rotation = this->rotation;
 	newSprite->depth = this->depth;
 	newSprite->tint = this->tint;
@@ -17,6 +18,12 @@ Sprite* Sprite::CloneTo(Entity* ent)
 
 void Sprite::Update()
 {
+	float deltaTime = aie::Application::GetInstance()->GetDeltaTime();
+	frameTimer += deltaTime;
+
+
+	frameIndex = (int)(frameTimer / frameRate) % anim->GetFrameCount();
+
 	entity->GetGameData()->AddSpriteDrawCall(this);
 }
 
@@ -24,17 +31,17 @@ void Sprite::Draw()
 {
 	aie::Renderer2D* renderer = entity->GetGameData()->GetRenderer();
 	renderer->SetRenderColour(tint);
-	renderer->DrawSpriteTransformed3x3(tex, &(entity->GetTransform()->GetGlobalTransform().m[0]), 0.0f, 0.0f, this->depth);
+	renderer->DrawSpriteTransformed3x3(anim->GetFrame(frameIndex), &(entity->GetTransform()->GetGlobalTransform().m[0]), 0.0f, 0.0f, this->depth);
 }
 
-aie::Texture* Sprite::GetTexture()
+Animation* Sprite::GetAnimation()
 {
-	return this->tex;
+	return this->anim;
 }
 
-void Sprite::SetTexture(aie::Texture* tex)
+void Sprite::SetAnimation(Animation* tex)
 {
-	this->tex = tex;
+	this->anim = tex;
 }
 
 float Sprite::GetRotation()

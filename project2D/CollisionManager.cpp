@@ -63,7 +63,7 @@ void CollisionManager::CheckCollisions()
 				}
 				else
 				{
-					if (TestCircles((ColliderCircle*)a, (ColliderCircle*)b, resolveVector, resolveDistance))
+					if (TestCircles((ColliderCircle*)a, (ColliderCircle*)b, resolveVector, resolveDistance, false))
 					{
 						collided = true;
 					}
@@ -238,6 +238,43 @@ bool CollisionManager::TestCircles(ColliderCircle* a, ColliderCircle* b, Vector2
 
 		return true;
 	}
+
+	return false;
+}
+
+bool CollisionManager::TestPolygonToCircle(ColliderPolygon* poly, ColliderCircle* circ, Vector2& resolveVector, float& resolveDistance, bool flipResults)
+{
+	return false;
+}
+
+bool CollisionManager::RayCast(Vector2 origin, Vector2 direction, float maxDistance, RayHit& rayHit)
+{
+	
+	return false;
+	
+}
+
+bool CollisionManager::RayCastToPolygon(ColliderPolygon* collider, Vector2 origin, Vector2 direction, float maxDistance, RayHit& rayHit)
+{
+	Vector2 p1 = origin;
+	Vector2 p2 = origin + (direction * maxDistance);
+
+	Vector2* points;
+
+	int pointCount = collider->GetTransformedPoints(points);
+
+	Vector2* normals = new Vector2[pointCount];
+
+	//Generate normals
+	for (int i = 0; i < pointCount; ++i)
+	{
+		normals[i] = (points[(i + 1) % pointCount] - points[i]).RightAngle().Normalised();
+	}
+
+
+
+	delete normals;
+	delete points;
 
 	return false;
 }

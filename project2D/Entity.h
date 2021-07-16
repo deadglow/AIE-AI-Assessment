@@ -29,6 +29,11 @@ public:
 	template <class T>
 	T* AddComponent()
 	{
+		if (typeid(T) == typeid(Component) || typeid(T) == typeid(Collider))
+		{
+			throw "Bad component add";
+			return nullptr;
+		}
 
 		if (components.find(typeid(T)) != components.end())
 		{
@@ -45,6 +50,12 @@ public:
 	template <class T>
 	void RemoveComponent()
 	{
+		if (typeid(T) == typeid(Component) || typeid(T) == typeid(Collider))
+		{
+			throw "Bad component remove";
+			return nullptr;
+		}
+
 		auto& result = components.find(typeid(T));
 
 		if (result != components.end())
@@ -63,7 +74,7 @@ public:
 
 	Entity* Clone();
 
-	void Start();
+	void OnCreate();
 
 	void Update();
 
@@ -77,6 +88,8 @@ public:
 
 	Entity* CreateEntity(Transform* transform);
 	Entity* CreateEntity();
+
+	void Destroy();
 
 protected:
 	Game2D* gameData;

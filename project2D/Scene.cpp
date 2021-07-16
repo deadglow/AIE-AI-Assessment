@@ -39,6 +39,12 @@ Entity* Scene::CreateEntity()
 	return CreateEntity(this->transform);
 }
 
+void Scene::DestroyEntity(Entity* ent)
+{
+	ent->GetTransform()->SetParent(nullptr);
+	delete ent;
+}
+
 void Scene::Update()
 {
 	for (Transform* t : *transform->_GetChildrenList())

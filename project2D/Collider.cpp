@@ -25,7 +25,7 @@ Collider* Collider::CloneTo(Entity* ent)
 
 bool Collider::IsStatic()
 {
-	return isStatic;
+	return	isStatic;
 }
 
 void Collider::SetStatic(bool value)

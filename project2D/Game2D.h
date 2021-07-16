@@ -12,6 +12,7 @@ class Sprite;
 class Scene;
 class Entity;
 class CollisionManager;
+class PhysObject;
 
 class Game2D : public aie::Game
 {
@@ -37,7 +38,6 @@ protected:
 	aie::Renderer2D* m_2dRenderer;
 
 	CollisionManager* collisionManager;
-	bool drawColliders = false;
 
 	Scene* mainScene;
 	Entity* player;
@@ -45,4 +45,8 @@ protected:
 	aie::Font* m_font;
 	std::map<std::string, aie::Texture*> textures;
 	std::queue<Sprite*> sprites;
+
+	bool drawColliders = false;
+
+	PhysObject* physTarget;
 };

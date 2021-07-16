@@ -13,6 +13,19 @@ ColliderPolygon::~ColliderPolygon()
 	delete[] points;
 }
 
+ColliderPolygon* ColliderPolygon::CloneTo(Entity* ent)
+{
+	ColliderPolygon* col = ent->AddComponent<ColliderPolygon>();
+	col->isStatic = this->isStatic;
+	col->restitution = this->restitution;
+	col->pointCount = this->pointCount;
+	col->points = new Vector2[pointCount];
+	memcpy_s(col->points, pointCount * sizeof(Vector2), this->points, pointCount * sizeof(Vector2));
+	//No need to assign attachedPhysObject since constructor does that
+
+	return col;
+}
+
 int ColliderPolygon::GetPointCount()
 {
 	return pointCount;

@@ -63,14 +63,14 @@ Entity* Entity::Clone()
 	return newEnt;
 }
 
-void Entity::Start()
+void Entity::OnCreate()
 {
 	for (auto& iter : components)
 		iter.second->Start();
 
 	for (Transform* t : *transform->_GetChildrenList())
 	{
-		t->GetEntity()->Start();
+		t->GetEntity()->OnCreate();
 	}
 }
 
@@ -124,4 +124,9 @@ Entity* Entity::CreateEntity(Transform* parent)
 Entity* Entity::CreateEntity()
 {
 	return gameData->GetMainScene()->CreateEntity();
+}
+
+void Entity::Destroy()
+{
+	this->gameData->GetMainScene()->DestroyEntity(this);
 }

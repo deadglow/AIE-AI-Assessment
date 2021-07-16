@@ -52,6 +52,8 @@ public:
 	
 	void Rotate(float radians);
 
+	void SetUp(Vector2 direction);
+
 	void LookAt(Vector2 point);
 
 protected:

@@ -173,6 +173,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Animation.cpp" />
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="ColliderBox.cpp" />
     <ClCompile Include="ColliderCircle.cpp" />
@@ -190,6 +191,7 @@
     <ClCompile Include="Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Animation.h" />
     <ClInclude Include="Collider.h" />
     <ClInclude Include="ColliderBox.h" />
     <ClInclude Include="ColliderCircle.h" />
@@ -200,6 +202,7 @@
     <ClInclude Include="ComponentIncludes.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Game2D.h" />
+    <ClInclude Include="Rayhit.h" />
     <ClInclude Include="Matrix3.h" />
     <ClInclude Include="PhysObject.h" />
     <ClInclude Include="Player.h" />

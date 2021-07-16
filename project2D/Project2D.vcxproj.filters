@@ -78,6 +78,9 @@
     <ClCompile Include="ColliderBox.cpp">
       <Filter>Source Files\Components\Collision</Filter>
     </ClCompile>
+    <ClCompile Include="Animation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game2D.h">
@@ -130,6 +133,12 @@
     </ClInclude>
     <ClInclude Include="Collision.h">
       <Filter>Header Files\Components\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Rayhit.h">
+      <Filter>Source Files\Components\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

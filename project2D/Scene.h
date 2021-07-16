@@ -13,6 +13,7 @@ public:
 	std::string GetName();
 	Entity* CreateEntity(Transform* parent);
 	Entity* CreateEntity();
+	void DestroyEntity(Entity* ent);
 	void Update();
 	void SetName(std::string newName);
 

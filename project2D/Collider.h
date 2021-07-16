@@ -16,7 +16,7 @@ public:
 	Collider(Entity* ent);
 	virtual ~Collider();
 
-	Collider* CloneTo(Entity* ent);
+	virtual Collider* CloneTo(Entity* ent) override;
 
 	bool IsStatic();
 	void SetStatic(bool value);

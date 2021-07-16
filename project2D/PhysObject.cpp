@@ -7,7 +7,7 @@ PhysObject* PhysObject::CloneTo(Entity* ent)
 {
 	PhysObject* phys = ent->AddComponent<PhysObject>();
 	
-	phys->mass = this->mass;
+	phys->inverseMass = this->inverseMass;
 	phys->drag = this->drag;
 	phys->angularDrag = this->angularDrag;
 	phys->velocity = this->velocity;
@@ -18,8 +18,12 @@ PhysObject* PhysObject::CloneTo(Entity* ent)
 
 void PhysObject::OnCollision(Collision collision)
 {
+	Vector2 resolve = collision.resolveVector;
 	//Get outta there
-	entity->GetTransform()->Translate(collision.resolveVector, false);
+	if (collision.other->IsStatic())
+		resolve /= 2;
+
+	entity->GetTransform()->Translate(resolve, false);
 
 	Vector2 resolveAxis = -collision.resolveVector / abs(collision.resolveDistance);
 	float dot = Vector2::Dot(velocity, resolveAxis);
@@ -41,17 +45,17 @@ void PhysObject::Update()
 
 void PhysObject::AddForce(Vector2 force)
 {
-	velocity += force / mass;
+	velocity += force * inverseMass;
 }
 
-float PhysObject::GetMass()
+float PhysObject::GetInverseMass()
 {
-	return mass;
+	return inverseMass;
 }
 
-void PhysObject::SetMass(float newMass)
+void PhysObject::SetInverseMass(float newMass)
 {
-	mass = newMass;
+	inverseMass = newMass;
 }
 
 float PhysObject::GetDrag()

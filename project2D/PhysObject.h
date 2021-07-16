@@ -20,8 +20,8 @@ public:
 
 	void AddForce(Vector2 force);
 	
-	float GetMass();
-	void SetMass(float newMass);
+	float GetInverseMass();
+	void SetInverseMass(float value);
 
 	float GetDrag();
 	void SetDrag(float newDrag);
@@ -35,7 +35,7 @@ public:
 	float GetAngularVelocity();
 	void SetAngularVelocity(float angularVel);
 protected:
-	float mass = 1.0f;
+	float inverseMass = 1.0f;
 	float drag = 0.3f;
 	float angularDrag = 0.3f;
 	Vector2 velocity = { 0.0f, 0.0f };
