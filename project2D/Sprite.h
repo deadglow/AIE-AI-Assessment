@@ -4,6 +4,8 @@
 #include "Renderer2D.h"
 #include "Animation.h"
 
+#define ANIMATION_FRAMERATE 20
+
 class Sprite : public Component
 {
 public:
@@ -17,7 +19,7 @@ public:
 	void Draw();
 
 	Animation* GetAnimation();
-	void SetAnimation(Animation* tex);
+	void SetAnimation(Animation* anim);
 
 	float GetRotation();
 	void SetRotation(float rotation);
@@ -34,10 +36,10 @@ public:
 	void SetFlipX(bool flip);
 	void SetFlipY(bool flip);
 protected:
-	Animation* anim;
-	int frameIndex;
-	float frameRate;
-	float frameTimer;
+	Animation* anim = nullptr;
+	int frameIndex = 0;
+	float frameRate = ANIMATION_FRAMERATE;
+	float frameTimer = 0;
 	float rotation = 0.0f;
 	float depth = 0.0f;
 	unsigned int tint = UINT32_MAX;

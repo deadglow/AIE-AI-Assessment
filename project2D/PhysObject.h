@@ -2,6 +2,8 @@
 #include "Vector2.h"
 #include "Component.h"
 
+#define MAX_SPEED 1200.0f
+
 using namespace MathMan;
 
 class Collider;

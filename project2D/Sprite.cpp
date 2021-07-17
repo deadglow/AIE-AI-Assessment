@@ -1,12 +1,16 @@
 #include "Sprite.h"
 #include "Entity.h"
 #include "Application.h"
+#include <iostream>
 
 Sprite* Sprite::CloneTo(Entity* ent)
 {
 	//Copy all this shiiiiii
 	Sprite* newSprite = ent->AddComponent<Sprite>();
 	newSprite->anim = this->anim;
+	newSprite->frameIndex = this->frameIndex;
+	newSprite->frameRate = this->frameRate;
+	newSprite->frameTimer = this->frameTimer;
 	newSprite->rotation = this->rotation;
 	newSprite->depth = this->depth;
 	newSprite->tint = this->tint;
@@ -21,8 +25,7 @@ void Sprite::Update()
 	float deltaTime = aie::Application::GetInstance()->GetDeltaTime();
 	frameTimer += deltaTime;
 
-
-	frameIndex = (int)(frameTimer / frameRate) % anim->GetFrameCount();
+	frameIndex = (int)(frameTimer * frameRate) % anim->GetFrameCount();
 
 	entity->GetGameData()->AddSpriteDrawCall(this);
 }
@@ -39,9 +42,9 @@ Animation* Sprite::GetAnimation()
 	return this->anim;
 }
 
-void Sprite::SetAnimation(Animation* tex)
+void Sprite::SetAnimation(Animation* anim)
 {
-	this->anim = tex;
+	this->anim = anim;
 }
 
 float Sprite::GetRotation()

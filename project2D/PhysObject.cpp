@@ -20,11 +20,15 @@ void PhysObject::OnCollision(Collision collision)
 {
 	Vector2 resolve = collision.resolveVector;
 	//Get outta there
-	if (collision.other->IsStatic())
+	if (!collision.other->IsStatic())
 		resolve /= 2;
 
 	entity->GetTransform()->Translate(resolve, false);
 
+	//Figure out inelastic collision stuff
+	//velocity = collision.finalMomentum * inverseMass;
+
+	//Fix elastic collisions too
 	Vector2 resolveAxis = -collision.resolveVector / abs(collision.resolveDistance);
 	float dot = Vector2::Dot(velocity, resolveAxis);
 	if (dot > 0)
@@ -37,6 +41,10 @@ void PhysObject::Update()
 	//Apply drag
 	velocity -= velocity * std::min(drag * deltaTime, 1.0f);
 	angularVelocity -= angularVelocity * std::min(angularDrag * deltaTime, 1.0f);
+
+	//Limit velocity
+	if (velocity.SqrMagnitude() > MAX_SPEED * MAX_SPEED)
+		velocity = velocity.Normalised() * MAX_SPEED;
 
 	//Update position
 	entity->GetTransform()->Rotate(angularVelocity * DEG2RAD * deltaTime);

@@ -71,4 +71,11 @@ void Player::OnCollision(Collision collision)
 	
 	//Get outta there
 	entity->GetTransform()->Translate(collision.resolveVector, true);
+
+	PhysObject* otherPhys = collision.other->GetEntity()->GetComponent<PhysObject>();
+
+	if (otherPhys != nullptr)
+	{
+		otherPhys->AddForce(-collision.relativePosition.Normalised() * speed * aie::Application::GetInstance()->GetDeltaTime());
+	}
 }

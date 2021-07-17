@@ -2,16 +2,16 @@
 
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <filesystem>
+#include <conio.h>
 #include "Application.h"
 #include "Texture.h"
 #include "Font.h"
 #include "Input.h"
-#include "CollisionManager.h"
 #include "Scene.h"
-#include "Entity.h"
-#include "Sprite.h"
-#include "Player.h"
+#include "CollisionManager.h"
+#include "ComponentIncludes.h"
 
 aie::Renderer2D* Game2D::GetRenderer()
 {
@@ -43,9 +43,36 @@ aie::Texture* Game2D::GetTexture(std::string name)
 	return textures[name];
 }
 
+void Game2D::LoadAnimations()
+{
+	std::string path = "../bin/anims/";
+
+	for (const auto& entry : std::filesystem::directory_iterator(path))
+	{
+		std::ifstream animFile(entry.path().string().c_str());
+
+		std::string line;
+
+		Animation* animation = new Animation();
+		animation->SetName(entry.path().filename().string());
+		animations.insert(std::make_pair(animation->GetName(), animation));
+
+		while (std::getline(animFile, line))
+		{
+			animation->AddFrame(GetTexture(line));
+		}
+
+	}
+}
+
+Animation* Game2D::GetAnimation(std::string name)
+{
+	return animations[name];
+}
+
 void Game2D::AddSpriteDrawCall(Sprite* sprite)
 {
-	sprites.push(sprite);
+	spriteDrawCalls.push(sprite);
 }
 
 
@@ -57,8 +84,10 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 	collisionManager = new CollisionManager();
 
 	LoadTextures();
+	LoadAnimations();
 
-	m_font = new aie::Font("./font/consolas.ttf", 30);
+
+	m_font = new aie::Font("./font/consolas.ttf", 24);
 
 	mainScene = new Scene(this);
 
@@ -67,7 +96,7 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 	aie::Texture* tex = GetTexture("legs.png");
 	player->AddComponent<Player>();
 	player->AddComponent<Sprite>();
-	player->GetComponent<Sprite>()->SetTexture(tex);
+	player->GetComponent<Sprite>()->SetAnimation(GetAnimation("block.anim"));
 	player->AddComponent<ColliderBox>();
 	player->GetComponent<ColliderBox>()->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
 	player->GetTransform()->Rotate(1.3f);
@@ -75,15 +104,15 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 	////Create upper body
 	Entity* newEnt = mainScene->CreateEntity(player->GetTransform());
 	newEnt->AddComponent<Sprite>();
-	newEnt->GetComponent<Sprite>()->SetTexture(GetTexture("torso.png"));
+	newEnt->GetComponent<Sprite>()->SetAnimation(GetAnimation("torso.anim"));
 	newEnt->GetComponent<Sprite>()->SetDepth(-1.0f);
 	player->GetComponent<Player>()->SetTargeter(newEnt->GetTransform());
 
 	////Create wall
 	Entity* newWall = mainScene->CreateEntity();
 	newWall->AddComponent<Sprite>();
-	tex = GetTexture("grass.png");
-	newWall->GetComponent<Sprite>()->SetTexture(tex);
+	tex = GetTexture("wall.png");
+	newWall->GetComponent<Sprite>()->SetAnimation(GetAnimation("load.anim"));
 	newWall->AddComponent<ColliderBox>();
 	newWall->GetComponent<ColliderBox>()->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
 	newWall->GetComponent<ColliderBox>()->SetStatic(true);
@@ -92,12 +121,12 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 	//Create thing
 	newWall = mainScene->CreateEntity();
 	newWall->AddComponent<Sprite>();
-	tex = GetTexture("grass.png");
-	newWall->GetComponent<Sprite>()->SetTexture(tex);
+	tex = GetTexture("block.png");
+	newWall->GetComponent<Sprite>()->SetAnimation(GetAnimation("block.anim"));
 	PhysObject* phys = newWall->AddComponent<PhysObject>();
 	newWall->AddComponent<ColliderBox>();
 	newWall->GetComponent<ColliderBox>()->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
-	newWall->GetComponent<ColliderBox>()->SetRestitution(0.4f);
+	newWall->GetComponent<ColliderBox>()->SetRestitution(0.0f);
 	
 	newWall->GetTransform()->SetLocalPosition(Vector2(200.0f, 200.0f));
 
@@ -123,6 +152,12 @@ Game2D::~Game2D()
 		element.second = nullptr;
 	}
 
+	for (auto& anim : animations)
+	{
+		delete anim.second;
+		anim.second = nullptr;
+	}
+
 	// Delete the renderer.
 	delete m_2dRenderer;
 }
@@ -130,11 +165,11 @@ Game2D::~Game2D()
 void Game2D::Update(float deltaTime)
 {
 	aie::Input* input = aie::Input::GetInstance();
+	aie::Application* application = aie::Application::GetInstance();
 
 	// Exit the application if escape is pressed.
 	if (input->IsKeyDown(aie::INPUT_KEY_ESCAPE))
 	{
-		aie::Application* application = aie::Application::GetInstance();
 		application->Quit();
 	}
 
@@ -168,6 +203,11 @@ void Game2D::Update(float deltaTime)
 
 	if (input->WasKeyPressed(aie::INPUT_KEY_B))
 		drawColliders = !drawColliders;
+	
+	if (input->IsKeyDown(aie::INPUT_KEY_M))
+		application->SetTimeScale(0.5f);
+	else
+		application->SetTimeScale(1.0f);
 
 	//Drag dudes
 	if (input->IsMouseButtonDown(aie::INPUT_MOUSE_BUTTON_LEFT))
@@ -231,10 +271,10 @@ void Game2D::Draw()
 	m_2dRenderer->Begin();
 	
 	//Draw all sprites in queue
-	while (!sprites.empty())
+	while (!spriteDrawCalls.empty())
 	{
-		sprites.front()->Draw();
-		sprites.pop();
+		spriteDrawCalls.front()->Draw();
+		spriteDrawCalls.pop();
 	}
 
 	if (drawColliders)
@@ -249,6 +289,7 @@ void Game2D::Draw()
 	char fps[32];
 	sprintf_s(fps, 32, "FPS: %i", application->GetFPS());
 	m_2dRenderer->DrawText2D(m_font, fps, 15.0f, windowHeight - 32.0f);
+	m_2dRenderer->DrawText2D(m_font, "WASD to move camera.", 15.0f, windowHeight - 96.0f);
 
 	// Done drawing sprites. Must be called at the end of the Draw().
 	m_2dRenderer->End();

@@ -92,6 +92,14 @@ void CollisionManager::CheckCollisions()
 				col.resolveDistance = resolveDistance;
 				col.relativePosition = a->GetEntity()->GetTransform()->GetGlobalPosition() - b->GetEntity()->GetTransform()->GetGlobalPosition();
 				col.finalRestitution = restitution;
+				col.finalMomentum = Vector2();
+				PhysObject* aPhys = a->GetEntity()->GetComponent<PhysObject>();
+				PhysObject* bPhys = b->GetEntity()->GetComponent<PhysObject>();
+				if (aPhys != nullptr && bPhys != nullptr)
+				{
+					col.finalMomentum += aPhys->GetVelocity() / aPhys->GetInverseMass();
+					col.finalMomentum += bPhys->GetVelocity() / bPhys->GetInverseMass();
+				}
 
 				//Pass collision to collider a
 				a->GetEntity()->OnCollision(col);

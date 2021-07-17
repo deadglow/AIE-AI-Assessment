@@ -12,4 +12,5 @@ struct Collision
 	float resolveDistance;
 	Vector2 relativePosition;
 	float finalRestitution;
+	Vector2 finalMomentum;
 };

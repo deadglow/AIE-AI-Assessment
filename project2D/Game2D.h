@@ -9,6 +9,7 @@
 #include "Renderer2D.h"
 
 class Sprite;
+class Animation;
 class Scene;
 class Entity;
 class CollisionManager;
@@ -29,6 +30,9 @@ public:
 	void LoadTextures();
 	aie::Texture* GetTexture(std::string name);
 
+	void LoadAnimations();
+	Animation* GetAnimation(std::string name);
+
 	Scene* GetMainScene();
 	CollisionManager* GetCollisionManager();
 
@@ -43,8 +47,11 @@ protected:
 	Entity* player;
 	
 	aie::Font* m_font;
+
 	std::map<std::string, aie::Texture*> textures;
-	std::queue<Sprite*> sprites;
+	std::map<std::string, Animation*> animations;
+
+	std::queue<Sprite*> spriteDrawCalls;
 
 	bool drawColliders = false;
 
