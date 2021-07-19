@@ -2,6 +2,7 @@
 #include "Vector2.h"
 #include "Component.h"
 
+//Maximum speed a physics object can travel before being clamped
 #define MAX_SPEED 1200.0f
 
 using namespace MathMan;
@@ -37,8 +38,11 @@ public:
 	float GetAngularVelocity();
 	void SetAngularVelocity(float angularVel);
 protected:
+	//Finn told me to use inverse mass so here we are
 	float inverseMass = 1.0f;
+	//Translational drag
 	float drag = 0.3f;
+	//Drag of speen
 	float angularDrag = 0.3f;
 	Vector2 velocity = { 0.0f, 0.0f };
 	float angularVelocity = 0.0f;

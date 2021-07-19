@@ -18,6 +18,7 @@ public:
 
 protected:
 	std::string name = "Animation";
+	//Container for a set of frames, which are pointers to textures
 	std::vector<aie::Texture*> frames;
 };
 

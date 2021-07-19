@@ -5,18 +5,20 @@
 
 Entity::Entity(Game2D* gameData)
 {
+	//Every entity needs a transform
 	transform = AddComponent<Transform>();
 	this->gameData = gameData;
 }
 
 Entity::~Entity()
 {
-	int count = transform->GetChildCount();
-	for (int i = 0; i < count; ++i)
+	//delete all child entities
+	while (transform->GetChildCount() > 0)
 	{
-		delete transform->GetChild(i)->GetEntity();
+		delete transform->GetChild(0)->GetEntity();
 	}
 
+	//delete all components
 	for (auto& iterator : components)
 	{
 		delete iterator.second;
@@ -43,7 +45,7 @@ Entity* Entity::Clone()
 {
 	//Create new entity and clone each of this object's components to it
 	Entity* newEnt = new Entity(this->gameData);
-	
+
 	for (const auto& component : components)
 	{
 		component.second->CloneTo(newEnt);
@@ -65,21 +67,38 @@ Entity* Entity::Clone()
 
 void Entity::OnCreate()
 {
+	//This was meant to be cool and work when the entity was created
+	//But then I realised I always add components afterwards so it's kinda useless
 	for (auto& iter : components)
 		iter.second->Start();
 
-	for (Transform* t : *transform->_GetChildrenList())
+	for (Transform* t : *transform->GetChildrenList())
 	{
 		t->GetEntity()->OnCreate();
 	}
 }
 
+void Entity::OnDestroy()
+{
+	//Call OnDestroy() on components and the entity's children
+
+	for (auto& iter : components)
+		iter.second->OnDestroy();
+
+	for (Transform* t : *transform->GetChildrenList())
+	{
+		t->GetEntity()->OnDestroy();
+	}
+}
+
 void Entity::Update()
 {
+	//Main update loop
+
 	for (auto& iter : components)
 		iter.second->Update();
 
-	for (Transform* t : *transform->_GetChildrenList())
+	for (Transform* t : *transform->GetChildrenList())
 	{
 		t->GetEntity()->Update();
 	}
@@ -90,10 +109,27 @@ void Entity::OnCollision(Collision collision)
 	for (auto& iter : components)
 		iter.second->OnCollision(collision);
 
+	//This caused issues somewhere
+
 	/*for (Transform* t : *transform->_GetChildrenList())
 	{
 		t->GetEntity()->OnCollision(collision);
 	}*/
+}
+
+Entity* Entity::CreateEntity(Transform* parent)
+{
+	return gameData->GetMainScene()->CreateEntity(parent);
+}
+
+Entity* Entity::CreateEntity()
+{
+	return gameData->GetMainScene()->CreateEntity();
+}
+
+void Entity::Destroy()
+{
+	this->gameData->GetMainScene()->DestroyEntity(this);
 }
 
 std::string Entity::GetName()
@@ -114,19 +150,4 @@ int Entity::GetLayer()
 void Entity::SetLayer(int newLayer)
 {
 	layer = newLayer;
-}
-
-Entity* Entity::CreateEntity(Transform* parent)
-{
-	return gameData->GetMainScene()->CreateEntity(parent);
-}
-
-Entity* Entity::CreateEntity()
-{
-	return gameData->GetMainScene()->CreateEntity();
-}
-
-void Entity::Destroy()
-{
-	this->gameData->GetMainScene()->DestroyEntity(this);
 }

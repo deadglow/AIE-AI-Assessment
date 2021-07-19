@@ -204,7 +204,7 @@ void Renderer2D::DrawCircle(float xPos, float yPos, float radius, float depth)
 
 	// Splitting circle into 32 segments.
 	// Calculate delta as 2PI (circle) divided by the number of segments.
-	float rotDelta = glm::pi<float>() * 2.0f / 32.0f;
+	constexpr float rotDelta = glm::pi<float>() * 2.0f / 32.0f;
 
 	// 32 segment circle.
 	for (int i = 0; i < 32; ++i) 

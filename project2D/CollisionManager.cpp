@@ -29,7 +29,10 @@ void CollisionManager::CheckCollisions()
 
 			//Static vs static is unecessary
 			if (a->IsStatic() && b->IsStatic())
+			{
+				subIterator++;
 				continue;
+			}
 
 			//Implement collision masks here
 			

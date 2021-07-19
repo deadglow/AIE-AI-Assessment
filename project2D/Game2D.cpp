@@ -61,13 +61,36 @@ void Game2D::LoadAnimations()
 		{
 			animation->AddFrame(GetTexture(line));
 		}
-
 	}
 }
 
 Animation* Game2D::GetAnimation(std::string name)
 {
 	return animations[name];
+}
+
+void Game2D::CreateSceneFromMap()
+{
+	int data;
+	float top = room->GetHeight() * CELL_SIZE;
+	for (int y = 0; y < room->GetHeight(); ++y)
+	{
+		for (int x = 0; x < room->GetWidth(); ++x)
+		{
+			data = room->GetData(x, y);
+			switch (data)
+			{
+			case 1:
+				{
+					Entity* wallClone = wall->Clone();
+					wallClone->GetTransform()->SetLocalPosition({ (float)x * CELL_SIZE, top - (float)y * CELL_SIZE });
+				}
+				break;
+			default:
+				break;
+			}
+		}
+	}
 }
 
 void Game2D::AddSpriteDrawCall(Sprite* sprite)
@@ -81,25 +104,42 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 	// Initalise the 2D renderer.
 	m_2dRenderer = new aie::Renderer2D();
 
-	collisionManager = new CollisionManager();
+	aie::Application::GetInstance()->SetVSync(false);
 
+	m_font = new aie::Font("../bin/font/consolas.ttf", 24);
 	LoadTextures();
 	LoadAnimations();
+	room = new MushRoom("../bin/maps/exports/map.mushroom");
 
-
-	m_font = new aie::Font("./font/consolas.ttf", 24);
+	collisionManager = new CollisionManager();
 
 	mainScene = new Scene(this);
 
+	////Create wall
+	wall = mainScene->CreateEntity();
+	wall->AddComponent<Sprite>();
+	aie::Texture* tex = GetTexture("wall.png");
+	wall->GetComponent<Sprite>()->SetAnimation(GetAnimation("block.anim"));
+	wall->GetComponent<Sprite>()->SetFrameRate(5.0f);
+	wall->AddComponent<ColliderBox>();
+	wall->GetComponent<ColliderBox>()->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
+	wall->GetComponent<ColliderBox>()->SetStatic(true);
+	wall->GetTransform()->SetLocalPosition(Vector2( 10000.0f, 10000.0f ));
+
+	CreateSceneFromMap();
+
+
 	//Player
 	player = mainScene->CreateEntity();
-	aie::Texture* tex = GetTexture("legs.png");
+	tex = GetTexture("legs.png");
 	player->AddComponent<Player>();
 	player->AddComponent<Sprite>();
 	player->GetComponent<Sprite>()->SetAnimation(GetAnimation("block.anim"));
 	player->AddComponent<ColliderBox>();
 	player->GetComponent<ColliderBox>()->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
 	player->GetTransform()->Rotate(1.3f);
+
+	player->GetTransform()->SetLocalPosition({ 150.0f, 150.0f });
 
 	////Create upper body
 	Entity* newEnt = mainScene->CreateEntity(player->GetTransform());
@@ -108,31 +148,22 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 	newEnt->GetComponent<Sprite>()->SetDepth(-1.0f);
 	player->GetComponent<Player>()->SetTargeter(newEnt->GetTransform());
 
-	////Create wall
-	Entity* newWall = mainScene->CreateEntity();
-	newWall->AddComponent<Sprite>();
-	tex = GetTexture("wall.png");
-	newWall->GetComponent<Sprite>()->SetAnimation(GetAnimation("load.anim"));
-	newWall->AddComponent<ColliderBox>();
-	newWall->GetComponent<ColliderBox>()->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
-	newWall->GetComponent<ColliderBox>()->SetStatic(true);
-	newWall->GetTransform()->SetLocalPosition(Vector2( 500.0f, 500.0f ));
 
-	//Create thing
-	newWall = mainScene->CreateEntity();
-	newWall->AddComponent<Sprite>();
-	tex = GetTexture("block.png");
-	newWall->GetComponent<Sprite>()->SetAnimation(GetAnimation("block.anim"));
-	PhysObject* phys = newWall->AddComponent<PhysObject>();
-	newWall->AddComponent<ColliderBox>();
-	newWall->GetComponent<ColliderBox>()->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
-	newWall->GetComponent<ColliderBox>()->SetRestitution(0.0f);
-	
-	newWall->GetTransform()->SetLocalPosition(Vector2(200.0f, 200.0f));
+	////Create thing
+	//Entity* newWall = mainScene->CreateEntity();
+	//newWall->AddComponent<Sprite>();
+	//tex = GetTexture("block.png");
+	//newWall->GetComponent<Sprite>()->SetAnimation(GetAnimation("block.anim"));
+	//PhysObject* phys = newWall->AddComponent<PhysObject>();
+	//newWall->AddComponent<ColliderBox>();
+	//newWall->GetComponent<ColliderBox>()->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
+	//newWall->GetComponent<ColliderBox>()->SetRestitution(0.0f);
+	//
+	//newWall->GetTransform()->SetLocalPosition(Vector2(200.0f, 200.0f));
 
-	newWall->Clone();
-	newWall->Clone();
-	newWall->Clone();
+	//newWall->Clone();
+	//newWall->Clone();
+	//newWall->Clone();
 
 }
 
@@ -142,6 +173,8 @@ Game2D::~Game2D()
 	delete mainScene;
 
 	delete collisionManager;
+
+	delete room;
 
 	// Deleted the textures.
 	delete m_font;
@@ -218,7 +251,7 @@ void Game2D::Update(float deltaTime)
 
 			physTarget = nullptr;
 
-			for (auto& child : *mainScene->GetTransform()->_GetChildrenList())
+			for (auto& child : *mainScene->GetTransform()->GetChildrenList())
 			{
 				PhysObject* phys = child->GetEntity()->GetComponent<PhysObject>();
 

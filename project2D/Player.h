@@ -17,10 +17,13 @@ public:
 	void Update() override;
 	void OnCollision(Collision collision) override;
 
+	//Assigns a targeter transform to the player
 	void SetTargeter(Transform* t);
 
 private:
+	//Part of player that looks at mouse
 	Transform* targeter = nullptr;
+	//How fast the player can move (m/s)
 	float speed = 150.0f;
 
 };

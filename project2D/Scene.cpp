@@ -4,16 +4,18 @@
 Scene::Scene(Game2D* gameData)
 {
 	this->gameData = gameData;
+	//Scene doesn't have a parent
 	transform = new Transform(nullptr);
 }
 
 Scene::~Scene()
 {
-	int count = transform->GetChildCount();
-	for (int i = 0; i < count; ++i)
+	//Delete all children in scene (which then delete their own children recursively)
+	while (transform->GetChildCount() > 0)
 	{
-		delete transform->GetChild(i)->GetEntity();
+		delete transform->GetChild(0)->GetEntity();
 	}
+
 	delete transform;
 }
 
@@ -22,13 +24,9 @@ Transform* Scene::GetTransform()
 	return transform;
 }
 
-std::string Scene::GetName()
-{
-	return name;
-}
-
 Entity* Scene::CreateEntity(Transform* parent)
 {
+	//Creates a new entity with the parent being the scene (the root)
 	Entity* newEnt = new Entity(gameData);
 	newEnt->GetTransform()->SetParent(parent);
 	return newEnt;
@@ -41,16 +39,23 @@ Entity* Scene::CreateEntity()
 
 void Scene::DestroyEntity(Entity* ent)
 {
-	ent->GetTransform()->SetParent(nullptr);
+	//Call on destroy before deleting the entity
+	ent->OnDestroy();
 	delete ent;
 }
 
 void Scene::Update()
 {
-	for (Transform* t : *transform->_GetChildrenList())
+	//Call main update loop on all children
+	for (Transform* t : *transform->GetChildrenList())
 	{
 		t->GetEntity()->Update();
 	}
+}
+
+std::string Scene::GetName()
+{
+	return name;
 }
 
 void Scene::SetName(std::string newName)

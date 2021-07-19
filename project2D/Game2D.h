@@ -7,6 +7,10 @@
 #include "Game.h"
 #include "Vector2.h"
 #include "Renderer2D.h"
+#include "MushRoom.h"
+
+#define CELL_SIZE 32
+
 
 class Sprite;
 class Animation;
@@ -33,6 +37,8 @@ public:
 	void LoadAnimations();
 	Animation* GetAnimation(std::string name);
 
+	void CreateSceneFromMap();
+
 	Scene* GetMainScene();
 	CollisionManager* GetCollisionManager();
 
@@ -43,8 +49,12 @@ protected:
 
 	CollisionManager* collisionManager;
 
+	MushRoom* room;
+
 	Scene* mainScene;
+	
 	Entity* player;
+	Entity* wall;
 	
 	aie::Font* m_font;
 

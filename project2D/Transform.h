@@ -10,7 +10,7 @@ class Transform : public Component
 public:
 	using Component::Component;
 
-	~Transform() {};
+	~Transform();
 
 	Transform* CloneTo(Entity* ent) override;
 
@@ -19,9 +19,8 @@ public:
 
 	Transform* GetChild(int index);
 	
-	void _AddChild(Transform* child);
-	void _RemoveChild(Transform* child);
-	std::vector<Transform*>* _GetChildrenList();
+	//Returns memory address of child transforms list
+	std::vector<Transform*>* GetChildrenList();
 
 	size_t GetChildCount();
 
@@ -57,6 +56,9 @@ public:
 	void LookAt(Vector2 point);
 
 protected:
+	void _AddChild(Transform* child);
+	void _RemoveChild(Transform* child);
+
 	Transform* parent = nullptr;
 	std::vector<Transform*> children;
 

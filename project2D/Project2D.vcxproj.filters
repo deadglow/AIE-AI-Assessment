@@ -81,6 +81,9 @@
     <ClCompile Include="Animation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MushRoom.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game2D.h">
@@ -134,11 +137,14 @@
     <ClInclude Include="Collision.h">
       <Filter>Header Files\Components\Collision</Filter>
     </ClInclude>
-    <ClInclude Include="Rayhit.h">
-      <Filter>Source Files\Components\Collision</Filter>
-    </ClInclude>
     <ClInclude Include="Animation.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MushRoom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Rayhit.h">
+      <Filter>Header Files\Components\Collision</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

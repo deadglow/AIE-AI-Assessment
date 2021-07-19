@@ -1,6 +1,12 @@
 #include "Transform.h"
 #include "Entity.h"
 
+Transform::~Transform()
+{
+	//Remove this object as a child of the parent
+	SetParent(nullptr);
+}
+
 Transform* Transform::CloneTo(Entity* ent)
 {
 	//Don't clone, just copy data since transform already exists
@@ -24,7 +30,8 @@ void Transform::SetParent(Transform* transform)
 
 	parent = transform;
 
-	parent->_AddChild(this);
+	if (parent != nullptr)
+		parent->_AddChild(this);
 }
 
 Transform* Transform::GetChild(int index)
@@ -37,7 +44,7 @@ void Transform::_AddChild(Transform* child)
 	children.push_back(child);
 }
 
-std::vector<Transform*>* Transform::_GetChildrenList()
+std::vector<Transform*>* Transform::GetChildrenList()
 {
 	return &children;
 }

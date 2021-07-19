@@ -162,6 +162,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)bootstrap;$(SolutionDir)dependencies/imgui;$(SolutionDir)dependencies/glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -184,6 +185,7 @@
     <ClCompile Include="Game2D.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Matrix3.cpp" />
+    <ClCompile Include="MushRoom.cpp" />
     <ClCompile Include="PhysObject.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -202,6 +204,7 @@
     <ClInclude Include="ComponentIncludes.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Game2D.h" />
+    <ClInclude Include="MushRoom.h" />
     <ClInclude Include="Rayhit.h" />
     <ClInclude Include="Matrix3.h" />
     <ClInclude Include="PhysObject.h" />

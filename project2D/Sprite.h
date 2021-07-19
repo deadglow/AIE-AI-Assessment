@@ -21,6 +21,17 @@ public:
 	Animation* GetAnimation();
 	void SetAnimation(Animation* anim);
 
+	//Gets current frame index
+	int GetFrameIndex();
+	void SetFrameIndex(int index);
+
+	float GetFrameRate();
+	void SetFrameRate(float fr);
+
+	//0.0 - 1.0 value representing how far along the animation has progressed
+	float GetAnimationProgress();
+	void SetAnimationProgress(float value);
+
 	float GetRotation();
 	void SetRotation(float rotation);
 
@@ -36,10 +47,13 @@ public:
 	void SetFlipX(bool flip);
 	void SetFlipY(bool flip);
 protected:
+	//Animation stuff
 	Animation* anim = nullptr;
 	int frameIndex = 0;
 	float frameRate = ANIMATION_FRAMERATE;
-	float frameTimer = 0;
+	float progress = 0.0f;
+
+	//Sprite stuff
 	float rotation = 0.0f;
 	float depth = 0.0f;
 	unsigned int tint = UINT32_MAX;

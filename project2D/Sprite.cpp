@@ -2,6 +2,7 @@
 #include "Entity.h"
 #include "Application.h"
 #include <iostream>
+#include <cmath>
 
 Sprite* Sprite::CloneTo(Entity* ent)
 {
@@ -10,7 +11,7 @@ Sprite* Sprite::CloneTo(Entity* ent)
 	newSprite->anim = this->anim;
 	newSprite->frameIndex = this->frameIndex;
 	newSprite->frameRate = this->frameRate;
-	newSprite->frameTimer = this->frameTimer;
+	newSprite->progress = this->progress;
 	newSprite->rotation = this->rotation;
 	newSprite->depth = this->depth;
 	newSprite->tint = this->tint;
@@ -22,10 +23,10 @@ Sprite* Sprite::CloneTo(Entity* ent)
 
 void Sprite::Update()
 {
-	float deltaTime = aie::Application::GetInstance()->GetDeltaTime();
-	frameTimer += deltaTime;
+	progress += (aie::Application::GetInstance()->GetDeltaTime() * frameRate) / anim->GetFrameCount();
+	progress -= std::floorf(progress);
 
-	frameIndex = (int)(frameTimer * frameRate) % anim->GetFrameCount();
+	frameIndex = (int)(progress * anim->GetFrameCount());
 
 	entity->GetGameData()->AddSpriteDrawCall(this);
 }
@@ -45,6 +46,36 @@ Animation* Sprite::GetAnimation()
 void Sprite::SetAnimation(Animation* anim)
 {
 	this->anim = anim;
+}
+
+int Sprite::GetFrameIndex()
+{
+	return frameIndex;
+}
+
+void Sprite::SetFrameIndex(int index)
+{
+	frameIndex = index;
+}
+
+float Sprite::GetFrameRate()
+{
+	return frameRate;
+}
+
+void Sprite::SetFrameRate(float fr)
+{
+	frameRate = fr;
+}
+
+float Sprite::GetAnimationProgress()
+{
+	return progress;
+}
+
+void Sprite::SetAnimationProgress(float value)
+{
+	progress = value;
 }
 
 float Sprite::GetRotation()

@@ -10,14 +10,15 @@ public:
 	Scene(Game2D* gameData);
 	~Scene();
 	Transform* GetTransform();
-	std::string GetName();
 	Entity* CreateEntity(Transform* parent);
 	Entity* CreateEntity();
 	void DestroyEntity(Entity* ent);
 	void Update();
+	std::string GetName();
 	void SetName(std::string newName);
 
 protected:
+	//Pointer to refer back to game2d
 	Game2D* gameData;
 	std::string name;
 	Transform* transform;

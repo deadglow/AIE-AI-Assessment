@@ -9,13 +9,17 @@ class Game2D;
 class Entity
 {
 public:
+	//Pass gamedata so components have easier access to gamedata
 	Entity(Game2D* gameData);
 	~Entity();
+	
+	Game2D* GetGameData();
 
+	//Returns a component of given type, otherwise returns null if not found
 	template <class T>
 	T* GetComponent()
 	{
-		auto& result = components.find(typeid(T));
+		auto result = components.find(typeid(T));
 		if (result != components.end())
 		{
 			return (T*)(result->second);
@@ -26,15 +30,10 @@ public:
 		}
 	}
 
+	//Adds a component of given type
 	template <class T>
 	T* AddComponent()
 	{
-		if (typeid(T) == typeid(Component) || typeid(T) == typeid(Collider))
-		{
-			throw "Bad component add";
-			return nullptr;
-		}
-
 		if (components.find(typeid(T)) != components.end())
 		{
 			throw "bruh this already exists";
@@ -47,15 +46,10 @@ public:
 		}
 	}
 	
+	//Removes component of given type if found, otherwise throws an error
 	template <class T>
 	void RemoveComponent()
 	{
-		if (typeid(T) == typeid(Component) || typeid(T) == typeid(Collider))
-		{
-			throw "Bad component remove";
-			return nullptr;
-		}
-
 		auto& result = components.find(typeid(T));
 
 		if (result != components.end())
@@ -63,22 +57,35 @@ public:
 			delete result->second;
 			components.erase(result->first);
 		}
-		throw "Component not found.";
+		else
+		{
+			throw "Component not found.";
+		}
 	}
 
-	Transform* GetTransform();
 
-	Game2D* GetGameData();
+	Transform* GetTransform();
 
 	size_t GetComponentCount();
 
 	Entity* Clone();
 
+	//This doesn't actually get called ever but i'm too scared to delete it
 	void OnCreate();
+	
+	//Called when Destroy() is called before deleting
+	void OnDestroy();
 
+	//Called every frame, from the top of the tree downwards
 	void Update();
 
 	void OnCollision(Collision collision);
+
+	//Create entity from mainScene
+	Entity* CreateEntity(Transform* transform);
+	Entity* CreateEntity();
+
+	void Destroy();
 
 	std::string GetName();
 	void SetName(std::string);
@@ -86,15 +93,12 @@ public:
 	int GetLayer();
 	void SetLayer(int newLayer);
 
-	Entity* CreateEntity(Transform* transform);
-	Entity* CreateEntity();
-
-	void Destroy();
-
 protected:
 	Game2D* gameData;
 	std::string name;
+	//Was supposed to be used in colliders but no more
 	int layer;
 	Transform* transform;
+	//umap that uses type as a key, so components can be added as a generic
 	std::unordered_map<std::type_index, Component*> components;
 };
