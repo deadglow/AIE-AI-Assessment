@@ -13,6 +13,12 @@
 #include "CollisionManager.h"
 #include "ComponentIncludes.h"
 
+#define TEXTURE_DIRECTORY "textures/"
+#define MUSHROOM_DIRECTORY "maps/exports/"
+#define FONT_DIRECTORY "font/consolas.ttf"
+#define ANIM_DIRECTORY "anims/"
+
+
 aie::Renderer2D* Game2D::GetRenderer()
 {
 	return m_2dRenderer;
@@ -35,7 +41,7 @@ Pathfinder* Game2D::GetPathfinder()
 
 void Game2D::LoadTextures()
 {
-	std::string path = "../bin/textures/";
+	std::string path = TEXTURE_DIRECTORY;
 
 	for (const auto& entry : std::filesystem::directory_iterator(path))
 	{
@@ -50,7 +56,7 @@ aie::Texture* Game2D::GetTexture(std::string name)
 
 void Game2D::LoadAnimations()
 {
-	std::string path = "../bin/anims/";
+	std::string path = ANIM_DIRECTORY;
 
 	for (const auto& entry : std::filesystem::directory_iterator(path))
 	{
@@ -112,10 +118,10 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 
 	aie::Application::GetInstance()->SetVSync(false);
 
-	m_font = new aie::Font("../bin/font/consolas.ttf", 24);
+	m_font = new aie::Font(FONT_DIRECTORY, 24);
 	LoadTextures();
 	LoadAnimations();
-	room = new MushRoom("../bin/maps/exports/map.mushroom");
+	room = new MushRoom(MUSHROOM_DIRECTORY + std::string("map.mushroom"));
 	pathfinder = new Pathfinder(room->GetWidth(), room->GetHeight(), CELL_SIZE);
 
 	collisionManager = new CollisionManager();
@@ -164,7 +170,6 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 	PhysObject* phys = newWall->AddComponent<PhysObject>();
 	newWall->AddComponent<ColliderPolygon>();
 	newWall->GetComponent<ColliderPolygon>()->GenerateShape(9, tex->GetWidth() / 2);
-	//newWall->GetComponent<ColliderBox>()->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
 	newWall->GetComponent<ColliderPolygon>()->SetRestitution(0.2f);
 	newWall->AddComponent<AIFollower>();
 	
