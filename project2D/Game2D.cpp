@@ -28,6 +28,11 @@ CollisionManager* Game2D::GetCollisionManager()
 	return collisionManager;
 }
 
+Pathfinder* Game2D::GetPathfinder()
+{
+	return pathfinder;
+}
+
 void Game2D::LoadTextures()
 {
 	std::string path = "../bin/textures/";
@@ -83,7 +88,8 @@ void Game2D::CreateSceneFromMap()
 			case 1:
 				{
 					Entity* wallClone = wall->Clone();
-					wallClone->GetTransform()->SetLocalPosition({ (float)x * CELL_SIZE, top - (float)y * CELL_SIZE });
+					wallClone->GetTransform()->SetLocalPosition({ (float)x * CELL_SIZE, (float)y * CELL_SIZE });
+					pathfinder->GetNode(x, y)->blocked = true;
 				}
 				break;
 			default:
@@ -110,6 +116,7 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 	LoadTextures();
 	LoadAnimations();
 	room = new MushRoom("../bin/maps/exports/map.mushroom");
+	pathfinder = new Pathfinder(room->GetWidth(), room->GetHeight(), CELL_SIZE);
 
 	collisionManager = new CollisionManager();
 
@@ -149,21 +156,34 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 	player->GetComponent<Player>()->SetTargeter(newEnt->GetTransform());
 
 
-	////Create thing
-	//Entity* newWall = mainScene->CreateEntity();
-	//newWall->AddComponent<Sprite>();
-	//tex = GetTexture("block.png");
-	//newWall->GetComponent<Sprite>()->SetAnimation(GetAnimation("block.anim"));
-	//PhysObject* phys = newWall->AddComponent<PhysObject>();
-	//newWall->AddComponent<ColliderBox>();
-	//newWall->GetComponent<ColliderBox>()->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
-	//newWall->GetComponent<ColliderBox>()->SetRestitution(0.0f);
-	//
-	//newWall->GetTransform()->SetLocalPosition(Vector2(200.0f, 200.0f));
+	//Create thing
+	Entity* newWall = mainScene->CreateEntity();
+	newWall->AddComponent<Sprite>();
+	tex = GetTexture("block.png");
+	newWall->GetComponent<Sprite>()->SetAnimation(GetAnimation("block.anim"));
+	PhysObject* phys = newWall->AddComponent<PhysObject>();
+	newWall->AddComponent<ColliderBox>();
+	newWall->GetComponent<ColliderBox>()->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
+	newWall->GetComponent<ColliderBox>()->SetRestitution(0.0f);
+	AIFollower* follow = newWall->AddComponent<AIFollower>();
+	
+	newWall->GetTransform()->SetLocalPosition(Vector2(200.0f, 200.0f));
 
-	//newWall->Clone();
-	//newWall->Clone();
-	//newWall->Clone();
+	newWall->Clone();
+	newWall->Clone();
+	newWall->Clone();
+	newWall->Clone();
+	newWall->Clone();
+	newWall->Clone();
+	newWall->Clone();
+	newWall->Clone();
+	newWall->Clone();
+	newWall->Clone();
+	newWall->Clone();
+	newWall->Clone();
+	newWall->Clone();
+	newWall->Clone();
+	newWall->Clone();
 
 }
 
@@ -175,6 +195,12 @@ Game2D::~Game2D()
 	delete collisionManager;
 
 	delete room;
+
+	delete pathfinder;
+
+	if (flowField != nullptr)
+		delete[] flowField;
+
 
 	// Deleted the textures.
 	delete m_font;
@@ -282,6 +308,11 @@ void Game2D::Update(float deltaTime)
 		physTarget = nullptr;
 	}
 
+	if (flowField != nullptr)
+		delete[] flowField;
+	flowField = nullptr;
+	pathfinder->CreateFlowField(flowField, player->GetTransform()->GetGlobalPosition());
+
 	mainScene->Update();
 	mainScene->GetTransform()->UpdateGlobalMatrix();
 	collisionManager->CheckCollisions();
@@ -296,7 +327,6 @@ void Game2D::Draw()
 	aie::Application* application = aie::Application::GetInstance();
 	float time = application->GetTime();
 
-
 	// Wipe the screen to clear away the previous frame.
 	application->ClearScreen();
 
@@ -304,8 +334,29 @@ void Game2D::Draw()
 	m_2dRenderer->Begin();
 	
 	//Draw all sprites in queue
+	Vector2 playerPos = player->GetTransform()->GetGlobalPosition();
+
 	while (!spriteDrawCalls.empty())
 	{
+		m_2dRenderer->SetRenderColour(1.0f, 1.0f, 1.0f);
+
+		if (flowField != nullptr)
+		{
+			float dist = (playerPos - spriteDrawCalls.front()->GetEntity()->GetTransform()->GetGlobalPosition()).Magnitude();
+			PathfinderNode* node = pathfinder->GetNodeFromPos(spriteDrawCalls.front()->GetEntity()->GetTransform()->GetGlobalPosition());
+			float nodeDist = (float)flowField[pathfinder->GetIndex(node->x, node->y)].gScore;
+	#define scale 2
+	#define distance 350.0f
+#define nodeDistance 150.0f
+			float ratio = dist / distance;
+			float otherRatio = nodeDist / nodeDistance;
+
+			ratio = std::max(ratio, otherRatio);
+
+			ratio = std::clamp(scale - (scale * ratio * ratio), 0.0f, 1.0f);
+			m_2dRenderer->SetRenderColour(1.0f * ratio, 1.0f * ratio, 1.0f * ratio);
+
+		}
 		spriteDrawCalls.front()->Draw();
 		spriteDrawCalls.pop();
 	}
@@ -314,6 +365,29 @@ void Game2D::Draw()
 	{
 		m_2dRenderer->SetRenderColour(0.0f, 1.0f, 0.0f);
 		collisionManager->DrawColliders(m_2dRenderer);
+
+		if (flowField != nullptr)
+		{
+		
+			m_2dRenderer->SetRenderColour(1.0f, 0.2f, 0.0f);
+			for (int i = 0; i < pathfinder->GetWidth() * pathfinder->GetHeight(); ++i)
+			{
+				if (pathfinder->GetNode(i) != nullptr)
+				{
+					auto node = pathfinder->GetNode(i);
+					if (!node->blocked)
+					{
+						Vector2 origin = (Vector2(node->x, node->y) * CELL_SIZE);
+						Vector2 end = origin + (flowField[i].direction * 20.0f);
+
+						m_2dRenderer->DrawLine(origin.x, origin.y, end.x, end.y, 1.2f);
+						m_2dRenderer->DrawCircle(origin.x, origin.y, 3.0f);
+
+					}
+
+				}
+			}
+		}
 	}
 	
 	// Draw some text.

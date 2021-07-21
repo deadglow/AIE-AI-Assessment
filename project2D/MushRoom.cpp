@@ -90,7 +90,7 @@ void MushRoom::LoadMapData(std::string path)
 			if (*iter == ' ')
 			{
 				//Separator found, so add the data to mapData
-				SetData(x, y, std::stoi(str));
+				SetData(x, height - 1 - y, std::stoi(str));
 				iter++;
 				x++;
 				//Data added, reset string

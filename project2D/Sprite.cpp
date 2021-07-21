@@ -34,7 +34,7 @@ void Sprite::Update()
 void Sprite::Draw()
 {
 	aie::Renderer2D* renderer = entity->GetGameData()->GetRenderer();
-	renderer->SetRenderColour(tint);
+	//renderer->SetRenderColour(tint);
 	renderer->DrawSpriteTransformed3x3(anim->GetFrame(frameIndex), &(entity->GetTransform()->GetGlobalTransform().m[0]), 0.0f, 0.0f, this->depth);
 }
 

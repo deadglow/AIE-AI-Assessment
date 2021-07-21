@@ -47,7 +47,7 @@ void PhysObject::Update()
 		velocity = velocity.Normalised() * MAX_SPEED;
 
 	//Update position
-	entity->GetTransform()->Rotate(angularVelocity * DEG2RAD * deltaTime);
+	entity->GetTransform()->Rotate(angularVelocity * (float)DEG2RAD * deltaTime);
 	entity->GetTransform()->Translate(velocity * deltaTime);
 }
 

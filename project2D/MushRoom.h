@@ -19,6 +19,7 @@ public:
 	void SetData(int x, int y, int data);
 protected:
 	std::string mapName = "";
+	//2D grid of ints represented as a 1d array
 	int* mapData = nullptr;
 	int width = 0;
 	int height = 0;

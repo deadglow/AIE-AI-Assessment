@@ -8,6 +8,8 @@
 #include "Vector2.h"
 #include "Renderer2D.h"
 #include "MushRoom.h"
+#include "Pathfinder.h"
+#include "SoundFieldNode.h"
 
 #define CELL_SIZE 32
 
@@ -41,15 +43,19 @@ public:
 
 	Scene* GetMainScene();
 	CollisionManager* GetCollisionManager();
+	Pathfinder* GetPathfinder();
 
 	void AddSpriteDrawCall(Sprite* sprite);
 
+	SoundFieldNode* flowField = nullptr;
 protected:
 	aie::Renderer2D* m_2dRenderer;
 
 	CollisionManager* collisionManager;
 
 	MushRoom* room;
+
+	Pathfinder* pathfinder;
 
 	Scene* mainScene;
 	

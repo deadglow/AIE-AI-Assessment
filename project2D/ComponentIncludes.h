@@ -8,3 +8,5 @@
 #include "ColliderCircle.h"
 #include "PhysObject.h"
 #include "Player.h"
+#include "AIFollower.h"
+#include "AIAgent.h"

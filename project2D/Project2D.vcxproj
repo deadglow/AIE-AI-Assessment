@@ -174,7 +174,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AIAgent.cpp" />
+    <ClCompile Include="AIFollower.cpp" />
+    <ClCompile Include="AIManager.cpp" />
     <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="BehaviourComposite.cpp" />
+    <ClCompile Include="BehaviourDecorator.cpp" />
+    <ClCompile Include="BehaviourDecoratorInverse.cpp" />
+    <ClCompile Include="BehaviourSelector.cpp" />
+    <ClCompile Include="BehaviourSequence.cpp" />
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="ColliderBox.cpp" />
     <ClCompile Include="ColliderCircle.cpp" />
@@ -183,17 +191,29 @@
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="Game2D.cpp" />
+    <ClCompile Include="Heap.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Matrix3.cpp" />
     <ClCompile Include="MushRoom.cpp" />
+    <ClCompile Include="Pathfinder.cpp" />
     <ClCompile Include="PhysObject.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Sound.cpp" />
+    <ClCompile Include="SoundField.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AIAgent.h" />
+    <ClInclude Include="AIFollower.h" />
+    <ClInclude Include="AIManager.h" />
     <ClInclude Include="Animation.h" />
+    <ClInclude Include="Behaviour.h" />
+    <ClInclude Include="BehaviourDecorator.h" />
+    <ClInclude Include="BehaviourDecoratorInverse.h" />
+    <ClInclude Include="BehaviourSelector.h" />
+    <ClInclude Include="BehaviourSequence.h" />
     <ClInclude Include="Collider.h" />
     <ClInclude Include="ColliderBox.h" />
     <ClInclude Include="ColliderCircle.h" />
@@ -204,12 +224,19 @@
     <ClInclude Include="ComponentIncludes.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Game2D.h" />
+    <ClInclude Include="BehaviourComposite.h" />
+    <ClInclude Include="Heap.h" />
     <ClInclude Include="MushRoom.h" />
+    <ClInclude Include="Pathfinder.h" />
+    <ClInclude Include="PathfinderNode.h" />
     <ClInclude Include="Rayhit.h" />
     <ClInclude Include="Matrix3.h" />
     <ClInclude Include="PhysObject.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="Sound.h" />
+    <ClInclude Include="SoundField.h" />
+    <ClInclude Include="SoundFieldNode.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Vector2.h" />
