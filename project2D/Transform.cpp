@@ -122,6 +122,7 @@ float Transform::GetGlobalRotation()
 
 void Transform::SetGlobalRotation(float radians)
 {
+	//Minus current globalRotation before adding new rotation
 	SetLocalRotation(-parent->GetGlobalRotation() + radians);
 }
 
@@ -145,6 +146,7 @@ void Transform::Translate(Vector2 delta, bool moveLocal)
 	}
 	else
 	{
+		//Create translation matrix scaled by the global transform's inverse matrix, moving the object in world space
 		Matrix3 translationMatrix = Matrix3::Identity();
 		translationMatrix.m[6] = delta.x;
 		translationMatrix.m[7] = delta.y;
@@ -183,14 +185,17 @@ void Transform::LookAt(Vector2 point)
 
 void Transform::UpdateGlobalMatrix()
 {
+	//Don't multiply by parent global if there is none
 	if (parent != nullptr)
 		globalTransform = parent->GetGlobalTransform() * localTransform;
 	else
 		globalTransform = localTransform;
 
+	//Update up/right
 	up = globalTransform.GetUp().Normalised();
 	right = globalTransform.GetRight().Normalised();
 
+	//Update child matrices
 	for (int i = 0; i < children.size(); ++i)
 	{
 		children[i]->UpdateGlobalMatrix();

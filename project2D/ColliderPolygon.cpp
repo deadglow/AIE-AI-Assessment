@@ -31,6 +31,7 @@ int ColliderPolygon::GetPointCount()
 	return pointCount;
 }
 
+//Creates a heap array of points multiplied by the transform's global transform
 int ColliderPolygon::GetTransformedPoints(Vector2*& outArray)
 {
 	outArray = new Vector2[pointCount]();
@@ -48,9 +49,13 @@ void ColliderPolygon::GenerateShape(int sides, float radius)
 	if (sides < 3)
 		throw "A polygon must be 3 or more sides.";
 	
+	pointCount = sides;
+
+	//Generates shape of given side count with equally separated points
+
 	points = new Vector2[sides];
 
-	float rotationGap = 2 * (float)PI / sides;
+	float rotationGap = 2 * (float)PI / (float)sides;
 
 	for (int i = 0; i < sides; ++i)
 	{
@@ -69,6 +74,7 @@ Collider::ColliderType ColliderPolygon::GetColliderType()
 	return Collider::ColliderType::Polygon;
 }
 
+//DEBUG: Draw collider points/edges
 void ColliderPolygon::Draw(aie::Renderer2D* renderer)
 {
 	Vector2* points;

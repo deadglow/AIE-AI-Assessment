@@ -160,12 +160,13 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 	Entity* newWall = mainScene->CreateEntity();
 	newWall->AddComponent<Sprite>();
 	tex = GetTexture("block.png");
-	newWall->GetComponent<Sprite>()->SetAnimation(GetAnimation("block.anim"));
+	newWall->GetComponent<Sprite>()->SetAnimation(GetAnimation("load.anim"));
 	PhysObject* phys = newWall->AddComponent<PhysObject>();
-	newWall->AddComponent<ColliderBox>();
-	newWall->GetComponent<ColliderBox>()->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
-	newWall->GetComponent<ColliderBox>()->SetRestitution(0.0f);
-	AIFollower* follow = newWall->AddComponent<AIFollower>();
+	newWall->AddComponent<ColliderPolygon>();
+	newWall->GetComponent<ColliderPolygon>()->GenerateShape(9, tex->GetWidth() / 2);
+	//newWall->GetComponent<ColliderBox>()->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
+	newWall->GetComponent<ColliderPolygon>()->SetRestitution(0.2f);
+	newWall->AddComponent<AIFollower>();
 	
 	newWall->GetTransform()->SetLocalPosition(Vector2(200.0f, 200.0f));
 

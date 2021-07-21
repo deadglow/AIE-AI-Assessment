@@ -45,14 +45,17 @@ public:
 	Vector2 GetLocalScale();
 	void SetLocalScale(Vector2 scale);
 	
+	//Update this globalmatrix and recursively update child matrices
 	void UpdateGlobalMatrix();
 
 	void Translate(Vector2 delta, bool moveLocal = true);
 	
 	void Rotate(float radians);
 
+	//Rotates object so up is pointing towards direction
 	void SetUp(Vector2 direction);
 
+	//Set the transform's up to face point
 	void LookAt(Vector2 point);
 
 protected:
