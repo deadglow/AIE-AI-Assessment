@@ -5,6 +5,7 @@ using namespace MathMan;
 
 struct SoundFieldNode
 {
-	Vector2 direction;
-	int gScore;
+	//Direction to previous node
+	Vector2 direction = Vector2();
+	int gScore = 0;
 };

@@ -20,10 +20,13 @@ public:
 
 	bool IsStatic();
 	void SetStatic(bool value);
+
 	float GetRestitution();
 	void SetRestitution(float value);
+
 	virtual ColliderType GetColliderType();
 
+	//For debug purposes
 	virtual void Draw(aie::Renderer2D* renderer) {};
 
 protected:

@@ -7,6 +7,7 @@ class Collider;
 
 struct Collision
 {
+	//Most of these aren't actually used but no time to restructure the collison stuff
 	Collider* other;
 	Vector2 resolveVector;
 	float resolveDistance;

@@ -11,7 +11,7 @@ public:
 
 	int GetPointCount();
 
-	//Creates memory! Outputs array of points transformed by this object's transform
+	//Creates heap data! Outputs array of points transformed by this object's transform
 	int GetTransformedPoints(Vector2*& outArray);
 
 	void GenerateShape(int sides, float radius);

@@ -175,12 +175,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AIAgent.cpp" />
-    <ClCompile Include="AIFollower.cpp" />
     <ClCompile Include="AIManager.cpp" />
+    <ClCompile Include="AIManagerBehaviours.cpp" />
     <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="Behaviour.cpp" />
+    <ClCompile Include="BehaviourAction.cpp" />
     <ClCompile Include="BehaviourComposite.cpp" />
     <ClCompile Include="BehaviourDecorator.cpp" />
     <ClCompile Include="BehaviourDecoratorInverse.cpp" />
+    <ClCompile Include="BehaviourQuery.cpp" />
     <ClCompile Include="BehaviourSelector.cpp" />
     <ClCompile Include="BehaviourSequence.cpp" />
     <ClCompile Include="Collider.cpp" />
@@ -206,12 +209,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AIAgent.h" />
-    <ClInclude Include="AIFollower.h" />
     <ClInclude Include="AIManager.h" />
+    <ClInclude Include="AIManagerBehaviours.h" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="Behaviour.h" />
+    <ClInclude Include="BehaviourAction.h" />
     <ClInclude Include="BehaviourDecorator.h" />
     <ClInclude Include="BehaviourDecoratorInverse.h" />
+    <ClInclude Include="BehaviourQuery.h" />
     <ClInclude Include="BehaviourSelector.h" />
     <ClInclude Include="BehaviourSequence.h" />
     <ClInclude Include="Collider.h" />

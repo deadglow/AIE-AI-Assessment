@@ -7,14 +7,29 @@ BehaviourSequence::~BehaviourSequence()
 BehaviourState BehaviourSequence::Execute(AIAgent* agent)
 {
 	BehaviourState behaviourState;
-	for (auto child : children)
+
+	//Look for failures or pending
+	for (int i = startChild; i < children.size(); ++i)
 	{
-		behaviourState = child->Execute(agent);
+		behaviourState = children[i]->Execute(agent);
 
 		//Returns failure or pending
-		if (behaviourState != BehaviourState::BehaviourStateSuccess)
+		if (behaviourState == BehaviourState::BehaviourStateFailure)
+		{
+			//Reset pending child
+			startChild = 0;
 			return behaviourState;
+		}
+		else if (behaviourState == BehaviourState::BehaviourStatePending)
+		{
+			//Change startChild to current pending node so that its run first (ensure that it's not pending anymore)
+			startChild = i;
+			return behaviourState;
+		}
 	}
+
+	//Reset pending child
+	startChild = 0;
 
 	return BehaviourState::BehaviourStateSuccess;
 }

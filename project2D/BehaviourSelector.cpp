@@ -8,23 +8,27 @@ BehaviourState BehaviourSelector::Execute(AIAgent* agent)
 {
 	BehaviourState behaviourState;
 
-	//Check for pending tasks first
-	for (auto child : children)
+	//look for successes
+	for (int i = startChild; i < children.size(); ++i)
 	{
-		behaviourState = child->Execute(agent);
+		behaviourState = children[i]->Execute(agent);
 		if (behaviourState == BehaviourState::BehaviourStatePending)
+		{
+			//Return pending and set start child to pending child so its called first
+			startChild = i;
 			return behaviourState;
-	}
-
-	//No pending was found, look for successes
-	for (auto child : children)
-	{
-		behaviourState = child->Execute(agent);
-
-		//Returns failure or pending
+		}
+		//Returns success
 		if (behaviourState == BehaviourState::BehaviourStateSuccess)
+		{
+			//Reset start child
+			startChild = 0;
 			return behaviourState;
+		}
 	}
+
+	//Reset start child
+	startChild = 0;
 
 	//No success, return failure
 	return BehaviourState::BehaviourStateFailure;

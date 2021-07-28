@@ -1,15 +1,80 @@
 #pragma once
 #include "Component.h"
+
+class SoundField;
+struct SoundFieldNode;
+class AIManager;
+
+#define HUNT_TIME 15
+#define ATTACK_RANGE 50
+#define LOOK_AROUND_SPEED 4
+#define MAX_DIST_FROM_SPAWN 70
+#define AGENT_ROTATION_DEGREES 70.0f
+
+#define AGENT_ACCELERATION 350.0f
+#define AGENT_MAX_SPEED 200.0f
+#define AGENT_FRICTION_MULT 2.0f
+#define AGENT_ATTACK_IMPULSE 500.0f
+
 class AIAgent :
     public Component
 {
 public:
+	
 	using Component::Component;
 
-	~AIAgent();
+	virtual ~AIAgent();
 
 	AIAgent* CloneTo(Entity* ent) override;
-protected:
 
+	void Update() override;
+
+	SoundFieldNode* GetSpawnFlowField();
+	void SetSpawn(Vector2 position);
+	Vector2 GetSpawn();
+	void SetSpawnFlowField(SoundFieldNode* field);
+
+
+	SoundField* GetSoundField();
+	//Deregister self from current soundfield then register self in new soundfield
+	void SetSoundField(SoundField* field);
+
+	AIManager* GetManager();
+	void SetManager(AIManager* manager);
+
+	//Works better than just adding force
+	void Accelerate(Vector2 direction);
+
+	//Follows the flowfield to the soundfield
+	void TravelToTarget();
+	//Follows the flowfield to its spawn
+	void TravelToSpawn();
+
+	//Dash
+	void Attack();
+
+	void LookAround(float speed);
+
+	void BeginHunting(float time);
+
+	bool JustHeardSound();
+	bool IsHunting();
+	bool IsSoundInAttackRange(float range);
+
+	bool IsSpawnInRange(int range);
+
+	bool IsWallAhead();
+
+	void MoveForward();
+
+	void Rotate(float radians);
+
+protected:
+	AIManager* manager;
+	SoundFieldNode* spawnFlowField = nullptr;
+	Vector2 spawn;
+	SoundField* soundField = nullptr;
+	bool justHeardSound = false;
+	float huntTimer = 0;
 };
 

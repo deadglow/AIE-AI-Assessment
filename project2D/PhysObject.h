@@ -3,7 +3,7 @@
 #include "Component.h"
 
 //Maximum speed a physics object can travel before being clamped
-#define MAX_SPEED 1200.0f
+#define PHYS_MAX_SPEED 1500.0f
 
 using namespace MathMan;
 

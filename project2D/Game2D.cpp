@@ -11,6 +11,7 @@
 #include "Input.h"
 #include "Scene.h"
 #include "CollisionManager.h"
+#include "AIManager.h"
 #include "ComponentIncludes.h"
 
 #define TEXTURE_DIRECTORY "textures/"
@@ -19,178 +20,78 @@
 #define ANIM_DIRECTORY "anims/"
 
 
-aie::Renderer2D* Game2D::GetRenderer()
-{
-	return m_2dRenderer;
-}
-
-Scene* Game2D::GetMainScene()
-{
-	return mainScene;
-}
-
-CollisionManager* Game2D::GetCollisionManager()
-{
-	return collisionManager;
-}
-
-Pathfinder* Game2D::GetPathfinder()
-{
-	return pathfinder;
-}
-
-void Game2D::LoadTextures()
-{
-	std::string path = TEXTURE_DIRECTORY;
-
-	for (const auto& entry : std::filesystem::directory_iterator(path))
-	{
-		textures.insert(std::make_pair(entry.path().filename().string(), new aie::Texture(entry.path().string().c_str())));
-	}
-}
-
-aie::Texture* Game2D::GetTexture(std::string name)
-{
-	return textures[name];
-}
-
-void Game2D::LoadAnimations()
-{
-	std::string path = ANIM_DIRECTORY;
-
-	for (const auto& entry : std::filesystem::directory_iterator(path))
-	{
-		std::ifstream animFile(entry.path().string().c_str());
-
-		std::string line;
-
-		Animation* animation = new Animation();
-		animation->SetName(entry.path().filename().string());
-		animations.insert(std::make_pair(animation->GetName(), animation));
-
-		while (std::getline(animFile, line))
-		{
-			animation->AddFrame(GetTexture(line));
-		}
-	}
-}
-
-Animation* Game2D::GetAnimation(std::string name)
-{
-	return animations[name];
-}
-
-void Game2D::CreateSceneFromMap()
-{
-	int data;
-	float top = room->GetHeight() * CELL_SIZE;
-	for (int y = 0; y < room->GetHeight(); ++y)
-	{
-		for (int x = 0; x < room->GetWidth(); ++x)
-		{
-			data = room->GetData(x, y);
-			switch (data)
-			{
-			case 1:
-				{
-					Entity* wallClone = wall->Clone();
-					wallClone->GetTransform()->SetLocalPosition({ (float)x * CELL_SIZE, (float)y * CELL_SIZE });
-					pathfinder->GetNode(x, y)->blocked = true;
-				}
-				break;
-			default:
-				break;
-			}
-		}
-	}
-}
-
-void Game2D::AddSpriteDrawCall(Sprite* sprite)
-{
-	spriteDrawCalls.push(sprite);
-}
-
-
 Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game(title, width, height, fullscreen)
 {
 	// Initalise the 2D renderer.
 	m_2dRenderer = new aie::Renderer2D();
-
 	aie::Application::GetInstance()->SetVSync(false);
 
+	//Initialise font, textures and animation
 	m_font = new aie::Font(FONT_DIRECTORY, 24);
 	LoadTextures();
 	LoadAnimations();
+
+	//Create room from file
 	room = new MushRoom(MUSHROOM_DIRECTORY + std::string("map.mushroom"));
+	//Generate pathfinder with same dimensions as room
 	pathfinder = new Pathfinder(room->GetWidth(), room->GetHeight(), CELL_SIZE);
 
+	//Create ai manager
+	aiManager = new AIManager(pathfinder);
+
+	//Create collision manager
 	collisionManager = new CollisionManager();
 
+	//Create new scene
 	mainScene = new Scene(this);
 
-	////Create wall
-	wall = mainScene->CreateEntity();
-	wall->AddComponent<Sprite>();
+	//Create wall
 	aie::Texture* tex = GetTexture("wall.png");
-	wall->GetComponent<Sprite>()->SetAnimation(GetAnimation("block.anim"));
-	wall->GetComponent<Sprite>()->SetFrameRate(5.0f);
-	wall->AddComponent<ColliderBox>();
-	wall->GetComponent<ColliderBox>()->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
-	wall->GetComponent<ColliderBox>()->SetStatic(true);
+	wall = mainScene->CreateEntity();
+	auto spr = wall->AddComponent<Sprite>();
+	spr->SetAnimation(GetAnimation("block.anim"));
+	spr->SetFrameRate(5.0f);
+	ColliderBox* col = wall->AddComponent<ColliderBox>();
+	col->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
+	col->SetStatic(true);
 	wall->GetTransform()->SetLocalPosition(Vector2( 10000.0f, 10000.0f ));
 
-	CreateSceneFromMap();
+	//Create AI
+	tex = GetTexture("block.png");
+	enemy = mainScene->CreateEntity();
+	enemy->AddComponent<Sprite>()->SetAnimation(GetAnimation("block.anim"));
+	PhysObject* phys = enemy->AddComponent<PhysObject>();
+	phys->SetDrag(0.4f);
+	phys->SetAngularDrag(0.4f);
+	ColliderPolygon* colPol = enemy->AddComponent<ColliderPolygon>();
+	colPol->GenerateShape(9, tex->GetWidth() / 2);
+	colPol->SetRestitution(0.2f);
+	enemy->AddComponent<AIAgent>();
+	enemy->GetTransform()->SetLocalPosition(Vector2(10000.0f, 10000.0f));
 
+	//Create scene now that wall and AI have been defined
+	CreateSceneFromMap();
+	
+	//Generate spawnflowfields for the AI
+	aiManager->CreateSpawnFlowFields();	
 
 	//Player
 	player = mainScene->CreateEntity();
 	tex = GetTexture("legs.png");
 	player->AddComponent<Player>();
-	player->AddComponent<Sprite>();
-	player->GetComponent<Sprite>()->SetAnimation(GetAnimation("block.anim"));
-	player->AddComponent<ColliderBox>();
-	player->GetComponent<ColliderBox>()->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
+	player->AddComponent<Sprite>()->SetAnimation(GetAnimation("block.anim"));
+	colPol = player->AddComponent<ColliderPolygon>();
+	colPol->GenerateShape(9, tex->GetWidth() / 2);
 	player->GetTransform()->Rotate(1.3f);
 
-	player->GetTransform()->SetLocalPosition({ 150.0f, 150.0f });
+	//Create upper body
+	Entity* torso = mainScene->CreateEntity(player->GetTransform());
+	spr = torso->AddComponent<Sprite>();
+	spr->SetAnimation(GetAnimation("torso.anim"));
+	spr->SetDepth(-1.0f);
+	player->GetComponent<Player>()->SetTargeter(torso->GetTransform());
 
-	////Create upper body
-	Entity* newEnt = mainScene->CreateEntity(player->GetTransform());
-	newEnt->AddComponent<Sprite>();
-	newEnt->GetComponent<Sprite>()->SetAnimation(GetAnimation("torso.anim"));
-	newEnt->GetComponent<Sprite>()->SetDepth(-1.0f);
-	player->GetComponent<Player>()->SetTargeter(newEnt->GetTransform());
-
-
-	//Create thing
-	Entity* newWall = mainScene->CreateEntity();
-	newWall->AddComponent<Sprite>();
-	tex = GetTexture("block.png");
-	newWall->GetComponent<Sprite>()->SetAnimation(GetAnimation("load.anim"));
-	PhysObject* phys = newWall->AddComponent<PhysObject>();
-	newWall->AddComponent<ColliderPolygon>();
-	newWall->GetComponent<ColliderPolygon>()->GenerateShape(9, tex->GetWidth() / 2);
-	newWall->GetComponent<ColliderPolygon>()->SetRestitution(0.2f);
-	newWall->AddComponent<AIFollower>();
-	
-	newWall->GetTransform()->SetLocalPosition(Vector2(200.0f, 200.0f));
-
-	newWall->Clone();
-	newWall->Clone();
-	newWall->Clone();
-	newWall->Clone();
-	newWall->Clone();
-	newWall->Clone();
-	newWall->Clone();
-	newWall->Clone();
-	newWall->Clone();
-	newWall->Clone();
-	newWall->Clone();
-	newWall->Clone();
-	newWall->Clone();
-	newWall->Clone();
-	newWall->Clone();
-
+	player->GetTransform()->SetLocalPosition(playerSpawn);
 }
 
 Game2D::~Game2D()
@@ -202,10 +103,12 @@ Game2D::~Game2D()
 
 	delete room;
 
+	delete aiManager;
+
 	delete pathfinder;
 
-	if (flowField != nullptr)
-		delete[] flowField;
+	if (playerFlowField != nullptr)
+		delete[] playerFlowField;
 
 
 	// Deleted the textures.
@@ -246,18 +149,6 @@ void Game2D::Update(float deltaTime)
 	Vector2 mousePos = { (float)input->GetMouseX(), (float)input->GetMouseY() };
 
 	mousePos += {camPosX, camPosY};
-
-	if (input->IsKeyDown(aie::INPUT_KEY_W))
-		camPosY += 500.0f * deltaTime;
-
-	if (input->IsKeyDown(aie::INPUT_KEY_S))
-		camPosY -= 500.0f * deltaTime;
-
-	if (input->IsKeyDown(aie::INPUT_KEY_A))
-		camPosX -= 500.0f * deltaTime;
-
-	if (input->IsKeyDown(aie::INPUT_KEY_D))
-		camPosX += 500.0f * deltaTime;
 
 	if (input->WasKeyPressed(aie::INPUT_KEY_C))
 	{
@@ -314,17 +205,29 @@ void Game2D::Update(float deltaTime)
 		physTarget = nullptr;
 	}
 
-	if (flowField != nullptr)
-		delete[] flowField;
-	flowField = nullptr;
-	pathfinder->CreateFlowField(flowField, player->GetTransform()->GetGlobalPosition());
+	if (input->WasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_RIGHT))
+	{
+		aiManager->CheckSound(Sound(mousePos, 500, 500));
+	}
 
+	//Player flowfield
+	if (playerFlowField != nullptr)
+		delete[] playerFlowField;
+
+	 playerFlowField = nullptr;
+	pathfinder->CreateFlowField(playerFlowField, player->GetTransform()->GetGlobalPosition());
+
+
+	//Call update and then check collisions
 	mainScene->Update();
+	aiManager->Update();
 	mainScene->GetTransform()->UpdateGlobalMatrix();
 	collisionManager->CheckCollisions();
 	mainScene->GetTransform()->UpdateGlobalMatrix();
 
-	m_2dRenderer->SetCameraPos(camPosX, camPosY);
+	Vector2 newCamPos = player->GetTransform()->GetGlobalPosition();
+	newCamPos = newCamPos - Vector2((float)application->GetWindowWidth(), (float)application->GetWindowHeight()) / 2;
+	m_2dRenderer->SetCameraPos(newCamPos.x, newCamPos.y);
 
 }
 
@@ -346,11 +249,11 @@ void Game2D::Draw()
 	{
 		m_2dRenderer->SetRenderColour(1.0f, 1.0f, 1.0f);
 
-		if (flowField != nullptr)
+		if (playerFlowField != nullptr)
 		{
 			float dist = (playerPos - spriteDrawCalls.front()->GetEntity()->GetTransform()->GetGlobalPosition()).Magnitude();
 			PathfinderNode* node = pathfinder->GetNodeFromPos(spriteDrawCalls.front()->GetEntity()->GetTransform()->GetGlobalPosition());
-			float nodeDist = (float)flowField[pathfinder->GetIndex(node->x, node->y)].gScore;
+			float nodeDist = (float)playerFlowField[pathfinder->GetIndex(node->x, node->y)].gScore;
 	#define scale 2
 	#define distance 350.0f
 #define nodeDistance 150.0f
@@ -372,9 +275,10 @@ void Game2D::Draw()
 		m_2dRenderer->SetRenderColour(0.0f, 1.0f, 0.0f);
 		collisionManager->DrawColliders(m_2dRenderer);
 
-		if (flowField != nullptr)
+		if (aiManager->GetSoundFieldCount() > 0)
 		{
-		
+			SoundField* soundField = aiManager->GetNewestSoundField();
+
 			m_2dRenderer->SetRenderColour(1.0f, 0.2f, 0.0f);
 			for (int i = 0; i < pathfinder->GetWidth() * pathfinder->GetHeight(); ++i)
 			{
@@ -383,8 +287,8 @@ void Game2D::Draw()
 					auto node = pathfinder->GetNode(i);
 					if (!node->blocked)
 					{
-						Vector2 origin = (Vector2(node->x, node->y) * CELL_SIZE);
-						Vector2 end = origin + (flowField[i].direction * 20.0f);
+						Vector2 origin = (Vector2((float)node->x, (float)node->y) * CELL_SIZE);
+						Vector2 end = origin + (soundField->GetSoundFieldNode(i)->direction * 20.0f);
 
 						m_2dRenderer->DrawLine(origin.x, origin.y, end.x, end.y, 1.2f);
 						m_2dRenderer->DrawCircle(origin.x, origin.y, 3.0f);
@@ -406,4 +310,118 @@ void Game2D::Draw()
 
 	// Done drawing sprites. Must be called at the end of the Draw().
 	m_2dRenderer->End();
+}
+
+aie::Renderer2D* Game2D::GetRenderer()
+{
+	return m_2dRenderer;
+}
+
+aie::Texture* Game2D::GetTexture(std::string name)
+{
+	return textures[name];
+}
+
+Animation* Game2D::GetAnimation(std::string name)
+{
+	return animations[name];
+}
+
+CollisionManager* Game2D::GetCollisionManager()
+{
+	return collisionManager;
+}
+
+Pathfinder* Game2D::GetPathfinder()
+{
+	return pathfinder;
+}
+
+Scene* Game2D::GetMainScene()
+{
+	return mainScene;
+}
+
+void Game2D::LoadTextures()
+{
+	std::string path = TEXTURE_DIRECTORY;
+
+	for (const auto& entry : std::filesystem::directory_iterator(path))
+	{
+		textures.insert(std::make_pair(entry.path().filename().string(), new aie::Texture(entry.path().string().c_str())));
+	}
+}
+
+void Game2D::LoadAnimations()
+{
+	std::string path = ANIM_DIRECTORY;
+
+	for (const auto& entry : std::filesystem::directory_iterator(path))
+	{
+		std::ifstream animFile(entry.path().string().c_str());
+
+		std::string line;
+
+		Animation* animation = new Animation();
+		animation->SetName(entry.path().filename().string());
+		animations.insert(std::make_pair(animation->GetName(), animation));
+
+		while (std::getline(animFile, line))
+		{
+			animation->AddFrame(GetTexture(line));
+		}
+	}
+}
+
+void Game2D::CreateSceneFromMap()
+{
+	int data;
+	float top = (float)room->GetHeight() * CELL_SIZE;
+	Entity* entity;
+	for (int y = 0; y < room->GetHeight(); ++y)
+	{
+		for (int x = 0; x < room->GetWidth(); ++x)
+		{
+			data = room->GetData(x, y);
+			switch (data)
+			{
+			case 1:
+			{
+				entity = wall->Clone();
+				entity->GetTransform()->SetLocalPosition({ (float)x * CELL_SIZE, (float)y * CELL_SIZE });
+				pathfinder->GetNode(x, y)->blocked = true;
+			}
+			break;
+
+			case 2:
+			{
+				SetPlayerSpawn({ (float)x * CELL_SIZE, (float)y * CELL_SIZE });
+			}
+			break;
+
+			case 4:
+			{
+				entity = enemy->Clone();
+				AIAgent* agent = entity->GetComponent<AIAgent>();
+				aiManager->AddAgent(agent);
+				agent->SetSpawn({ (float)x * CELL_SIZE, (float)y * CELL_SIZE });
+				entity->GetTransform()->SetLocalPosition(agent->GetSpawn());
+			}
+			break;
+
+			default:
+				break;
+			}
+		}
+	}
+}
+
+void Game2D::AddSpriteDrawCall(Sprite* sprite)
+{
+	spriteDrawCalls.push(sprite);
+}
+
+void Game2D::SetPlayerSpawn(Vector2 pos)
+{
+	playerSpawn = pos;
 }

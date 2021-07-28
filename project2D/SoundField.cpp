@@ -12,9 +12,9 @@ SoundField::~SoundField()
 	flowField = nullptr;
 }
 
-SoundFieldNode SoundField::GetSoundFieldNode(int i)
+SoundFieldNode* SoundField::GetSoundFieldNode(int i)
 {
-	return flowField[i];
+	return &flowField[i];
 }
 
 void SoundField::AssignFlowField(SoundFieldNode* flowField)
@@ -25,4 +25,19 @@ void SoundField::AssignFlowField(SoundFieldNode* flowField)
 Sound SoundField::GetSound()
 {
 	return sound;
+}
+
+void SoundField::RegisterAgent()
+{
+	assignedAgents++;
+}
+
+void SoundField::DeregisterAgent()
+{
+	assignedAgents--;
+}
+
+bool SoundField::UsedByAgents()
+{
+	return assignedAgents > 0;
 }

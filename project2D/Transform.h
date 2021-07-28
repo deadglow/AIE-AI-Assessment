@@ -28,6 +28,7 @@ public:
 	Matrix3 GetGlobalTransform();
 
 	Vector2 GetGlobalPosition();
+	//DOESNT WORK YET
 	void SetGlobalPosition(Vector2 pos);
 
 	Vector2 GetLocalPosition();

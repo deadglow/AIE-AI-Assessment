@@ -66,6 +66,13 @@ PathfinderNode* Pathfinder::GetNode(int index)
 
 PathfinderNode* Pathfinder::GetNodeFromPos(Vector2 pos)
 {
+	pos = GetNodeCoordinatesFromPos(pos);
+
+	return GetNode((int)pos.x, (int)pos.y);
+}
+
+Vector2 Pathfinder::GetNodeCoordinatesFromPos(Vector2 pos)
+{
 	pos.x = (pos.x / gridSize) + 0.5f;
 	pos.y = (pos.y / gridSize) + 0.5f;
 
@@ -73,7 +80,7 @@ PathfinderNode* Pathfinder::GetNodeFromPos(Vector2 pos)
 	pos.x = (float)fmax(0, fmin(pos.x, gridWidth - 1));
 	pos.y = (float)fmax(0, fmin(pos.y, gridHeight - 1));
 
-	return GetNode((int)pos.x, (int)pos.y);
+	return pos;
 }
 
 Vector2 Pathfinder::GetPosFromNode(PathfinderNode* node)
@@ -140,7 +147,6 @@ bool Pathfinder::CreateFlowField(SoundFieldNode*& outVecField, Vector2 targetPos
 				else
 				{
 					sfNode = SoundFieldNode();
-					sfNode.direction = Vector2();
 				}
 				outVecField[GetIndex(x, y)] = sfNode;
 			}

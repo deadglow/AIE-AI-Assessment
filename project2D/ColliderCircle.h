@@ -10,6 +10,7 @@ public:
 	float GetRadius();
 	void SetRadius(float value);
 
+	//Returns a radius thats scaled with the transform's scale
 	float GetTransformedRadius();
 
 	ColliderType GetColliderType() override;

@@ -43,8 +43,8 @@ void PhysObject::Update()
 	angularVelocity -= angularVelocity * std::min(angularDrag * deltaTime, 1.0f);
 
 	//Limit velocity
-	if (velocity.SqrMagnitude() > MAX_SPEED * MAX_SPEED)
-		velocity = velocity.Normalised() * MAX_SPEED;
+	if (velocity.SqrMagnitude() > PHYS_MAX_SPEED * PHYS_MAX_SPEED)
+		velocity = velocity.Normalised() * PHYS_MAX_SPEED;
 
 	//Update position
 	entity->GetTransform()->Rotate(angularVelocity * (float)DEG2RAD * deltaTime);

@@ -27,19 +27,19 @@ void Player::Update()
 	Transform* transform = entity->GetTransform();
 
 	Vector2 inputVec = { 0, 0 };
-	if (input->IsKeyDown(aie::INPUT_KEY_LEFT))
+	if (input->IsKeyDown(aie::INPUT_KEY_A))
 	{
 		inputVec.x -= 1.0f;
 	}
-	if (input->IsKeyDown(aie::INPUT_KEY_RIGHT))
+	if (input->IsKeyDown(aie::INPUT_KEY_D))
 	{
 		inputVec.x += 1.0f;
 	}
-	if (input->IsKeyDown(aie::INPUT_KEY_UP))
+	if (input->IsKeyDown(aie::INPUT_KEY_W))
 	{
 		inputVec.y += 1.0f;
 	}
-	if (input->IsKeyDown(aie::INPUT_KEY_DOWN))
+	if (input->IsKeyDown(aie::INPUT_KEY_S))
 	{
 		inputVec.y -= 1.0f;
 	}
@@ -49,7 +49,6 @@ void Player::Update()
 		inputVec = inputVec.Normalised();
 		transform->SetUp(inputVec);
 	}
-
 
 	//Torso direction
 

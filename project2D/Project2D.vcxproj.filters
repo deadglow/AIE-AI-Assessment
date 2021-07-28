@@ -99,9 +99,6 @@
     <ClCompile Include="MushRoom.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AIFollower.cpp">
-      <Filter>Source Files\Components</Filter>
-    </ClCompile>
     <ClCompile Include="Sound.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -137,6 +134,18 @@
     </ClCompile>
     <ClCompile Include="BehaviourDecorator.cpp">
       <Filter>Source Files\AI\Behaviour Tree</Filter>
+    </ClCompile>
+    <ClCompile Include="Behaviour.cpp">
+      <Filter>Source Files\AI\Behaviour Tree</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviourQuery.cpp">
+      <Filter>Source Files\AI\Behaviour Tree</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviourAction.cpp">
+      <Filter>Source Files\AI\Behaviour Tree</Filter>
+    </ClCompile>
+    <ClCompile Include="AIManagerBehaviours.cpp">
+      <Filter>Source Files\AI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -191,9 +200,6 @@
     <ClInclude Include="MushRoom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AIFollower.h">
-      <Filter>Header Files\Components</Filter>
-    </ClInclude>
     <ClInclude Include="Sound.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -243,6 +249,15 @@
       <Filter>Header Files\AI\Behaviour Tree</Filter>
     </ClInclude>
     <ClInclude Include="AIManager.h">
+      <Filter>Header Files\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourQuery.h">
+      <Filter>Header Files\AI\Behaviour Tree</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourAction.h">
+      <Filter>Header Files\AI\Behaviour Tree</Filter>
+    </ClInclude>
+    <ClInclude Include="AIManagerBehaviours.h">
       <Filter>Header Files\AI</Filter>
     </ClInclude>
   </ItemGroup>

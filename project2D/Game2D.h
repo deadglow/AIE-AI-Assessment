@@ -14,11 +14,12 @@
 #define CELL_SIZE 32
 
 
-class Sprite;
-class Animation;
+class CollisionManager;
+class AIManager;
 class Scene;
 class Entity;
-class CollisionManager;
+class Sprite;
+class Animation;
 class PhysObject;
 
 class Game2D : public aie::Game
@@ -33,21 +34,26 @@ public:
 
 	aie::Renderer2D* GetRenderer();
 
-	void LoadTextures();
 	aie::Texture* GetTexture(std::string name);
+	
+	Animation* GetAnimation(std::string name);
+	
+	CollisionManager* GetCollisionManager();
+	
+	Pathfinder* GetPathfinder();
+	
+	Scene* GetMainScene();
+
+	void LoadTextures();
 
 	void LoadAnimations();
-	Animation* GetAnimation(std::string name);
 
 	void CreateSceneFromMap();
 
-	Scene* GetMainScene();
-	CollisionManager* GetCollisionManager();
-	Pathfinder* GetPathfinder();
-
 	void AddSpriteDrawCall(Sprite* sprite);
 
-	SoundFieldNode* flowField = nullptr;
+	void SetPlayerSpawn(Vector2 pos);
+
 protected:
 	aie::Renderer2D* m_2dRenderer;
 
@@ -56,11 +62,16 @@ protected:
 	MushRoom* room;
 
 	Pathfinder* pathfinder;
+	AIManager* aiManager;
 
 	Scene* mainScene;
 	
 	Entity* player;
 	Entity* wall;
+	Entity* enemy;
+
+	Vector2 playerSpawn;
+	SoundFieldNode* playerFlowField = nullptr;
 	
 	aie::Font* m_font;
 
