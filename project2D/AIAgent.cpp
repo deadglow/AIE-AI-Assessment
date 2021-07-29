@@ -27,7 +27,16 @@ AIAgent* AIAgent::CloneTo(Entity* ent)
 void AIAgent::Update()
 {
 	if (huntTimer > 0)
+	{
 		huntTimer -= aie::Application::GetInstance()->GetDeltaTime();
+		entity->GetComponent<Sprite>()->SetFrameRate(AGENT_HUNT_ANIMSPEED);
+		speed = AGENT_HUNT_SPEED;
+	}
+	else
+	{
+		entity->GetComponent<Sprite>()->SetFrameRate(AGENT_PATROL_ANIMSPEED);
+		speed = AGENT_PATROL_SPEED;
+	}
 }
 
 SoundFieldNode* AIAgent::GetSpawnFlowField()
@@ -84,7 +93,7 @@ void AIAgent::Accelerate(Vector2 direction)
 
 	PhysObject* phys = entity->GetComponent<PhysObject>();
 	
-	Vector2 accelVec = (direction * AGENT_MAX_SPEED) - phys->GetVelocity();
+	Vector2 accelVec = (direction * speed) - phys->GetVelocity();
 	float remainSpeed = accelVec.Magnitude();
 
 	if (remainSpeed < 0.00001f)

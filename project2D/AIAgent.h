@@ -12,9 +12,13 @@ class AIManager;
 #define AGENT_ROTATION_DEGREES 70.0f
 
 #define AGENT_ACCELERATION 350.0f
-#define AGENT_MAX_SPEED 200.0f
+#define AGENT_HUNT_SPEED 200.0f
+#define AGENT_PATROL_SPEED 100.0f
 #define AGENT_FRICTION_MULT 2.0f
 #define AGENT_ATTACK_IMPULSE 500.0f
+
+#define AGENT_HUNT_ANIMSPEED 10.0f
+#define AGENT_PATROL_ANIMSPEED 3.0f
 
 class AIAgent :
     public Component
@@ -76,5 +80,6 @@ protected:
 	SoundField* soundField = nullptr;
 	bool justHeardSound = false;
 	float huntTimer = 0;
+	float speed = AGENT_PATROL_SPEED;
 };
 

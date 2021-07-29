@@ -4,6 +4,7 @@
 #include "Input.h"
 #include "Entity.h"
 #include "Sprite.h"
+#include "Throwable.h"
 
 Player::~Player()
 {
@@ -51,11 +52,48 @@ void Player::Update()
 	}
 
 	//Torso direction
-
 	Vector2 point = { (float)input->GetMouseX(), (float)input->GetMouseY() };
 	Vector2 centre = Vector2((float)app->GetWindowWidth(), (float)app->GetWindowHeight()) / 2;
 
 	targeter->SetUp((point - centre).Normalised());
+
+	if (heldThrowable != nullptr)
+	{
+		targeter->GetEntity()->GetComponent<Sprite>()->SetAnimationProgress(0.5f);
+		//Throwing and dropping
+		if (input->WasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_LEFT))
+		{
+			heldThrowable->Throw(targeter->GetRight() * THROW_VELOCITY, THROW_SPIN);
+			heldThrowable = nullptr;
+		}
+		else if (input->WasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_RIGHT))
+		{
+			heldThrowable->Drop();
+			heldThrowable = nullptr;
+		}
+	}
+	else
+	{
+		targeter->GetEntity()->GetComponent<Sprite>()->SetAnimationProgress(0.0f);
+		//Try pick up
+		if (input->WasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_RIGHT))
+		{
+			Game2D* gameData = entity->GetGameData();
+			//Loop through all throwables and assign the first one that is in range to heldThrowable;
+			for (int i = 0; i < gameData->GetThrowableCount(); ++i)
+			{
+				Throwable* throwable = gameData->GetThrowable(i);
+				if ((throwable->GetEntity()->GetTransform()->GetGlobalPosition() - entity->GetTransform()->GetGlobalPosition()).SqrMagnitude() < PICKUP_DISTANCE * PICKUP_DISTANCE)
+				{
+					heldThrowable = throwable;
+					heldThrowable->PickUp(targeter, Vector2::Right() * 40.0f);
+					break;
+				}
+			}
+		}
+	}
+
+
 
 	transform->Translate(inputVec * speed * deltaTime, true);
 }

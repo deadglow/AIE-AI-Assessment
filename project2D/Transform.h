@@ -49,6 +49,8 @@ public:
 	//Update this globalmatrix and recursively update child matrices
 	void UpdateGlobalMatrix();
 
+	void SetLocalTransform(Matrix3 newTransform);
+
 	void Translate(Vector2 delta, bool moveLocal = true);
 	
 	void Rotate(float radians);

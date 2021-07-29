@@ -20,8 +20,11 @@ public:
 	//Used when entity is cloned
 	virtual Component* CloneTo(Entity* ent) = 0;
 	
+	bool IsEnabled();
+	void SetEnabled(bool state);
+
 protected:
 	//Attached entity
 	Entity* entity;
-
+	bool enabled = true;
 };

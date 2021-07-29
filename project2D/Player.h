@@ -5,6 +5,12 @@
 #include "Texture.h"
 #include "Transform.h"
 
+class Throwable;
+
+#define THROW_VELOCITY 800.0f
+#define THROW_SPIN 800.0f
+#define PICKUP_DISTANCE 80.0f
+
 class Player : public Component
 {
 public:
@@ -26,5 +32,6 @@ private:
 	//How fast the player can move (m/s)
 	float speed = 300.0f;
 
+	Throwable* heldThrowable = nullptr;
 };
 

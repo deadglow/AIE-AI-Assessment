@@ -201,3 +201,8 @@ void Transform::UpdateGlobalMatrix()
 		children[i]->UpdateGlobalMatrix();
 	}
 }
+
+void Transform::SetLocalTransform(Matrix3 newTransform)
+{
+	localTransform = newTransform;
+}

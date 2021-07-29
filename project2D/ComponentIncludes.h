@@ -9,3 +9,4 @@
 #include "PhysObject.h"
 #include "Player.h"
 #include "AIAgent.h"
+#include "Throwable.h"

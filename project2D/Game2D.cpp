@@ -19,6 +19,14 @@
 #define FONT_DIRECTORY "font/consolas.ttf"
 #define ANIM_DIRECTORY "anims/"
 
+#define LOADED_MAP "map.mushroom"
+
+#define AI_PHYS_DRAG 0.4f
+#define AI_PHYS_ADRAG 0.4f
+#define AI_PHYS_RES 0.2f
+#define THROWABLE_PHYS_DRAG 0.6f
+#define THROWABLE_PHYS_ADRAG 0.8f
+#define THROWABLE_PHYS_RES 0.3f
 
 Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game(title, width, height, fullscreen)
 {
@@ -32,7 +40,7 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 	LoadAnimations();
 
 	//Create room from file
-	room = new MushRoom(MUSHROOM_DIRECTORY + std::string("map.mushroom"));
+	room = new MushRoom(MUSHROOM_DIRECTORY + std::string(LOADED_MAP));
 	//Generate pathfinder with same dimensions as room
 	pathfinder = new Pathfinder(room->GetWidth(), room->GetHeight(), CELL_SIZE);
 
@@ -45,29 +53,41 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 	//Create new scene
 	mainScene = new Scene(this);
 
-	//Create wall
+	//Create wall entity
 	aie::Texture* tex = GetTexture("wall.png");
-	wall = mainScene->CreateEntity();
-	auto spr = wall->AddComponent<Sprite>();
-	spr->SetAnimation(GetAnimation("block.anim"));
-	spr->SetFrameRate(5.0f);
-	ColliderBox* col = wall->AddComponent<ColliderBox>();
-	col->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
-	col->SetStatic(true);
-	wall->GetTransform()->SetLocalPosition(Vector2( 10000.0f, 10000.0f ));
+	wallTemplate = mainScene->CreateEntity();
+	wallTemplate->AddComponent<Sprite>()->SetAnimation(GetAnimation("wall.anim"));
+	ColliderBox* box = wallTemplate->AddComponent<ColliderBox>();
+	box->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
+	box->SetStatic(true);
+	wallTemplate->GetTransform()->SetLocalPosition(Vector2( 10000.0f, 10000.0f ));
 
-	//Create AI
-	tex = GetTexture("block.png");
-	enemy = mainScene->CreateEntity();
-	enemy->AddComponent<Sprite>()->SetAnimation(GetAnimation("block.anim"));
-	PhysObject* phys = enemy->AddComponent<PhysObject>();
-	phys->SetDrag(0.4f);
-	phys->SetAngularDrag(0.4f);
-	ColliderPolygon* colPol = enemy->AddComponent<ColliderPolygon>();
+	//Create AI agent
+	tex = GetTexture("creep1.png");
+	enemyTemplate = mainScene->CreateEntity();
+	enemyTemplate->AddComponent<Sprite>()->SetAnimation(GetAnimation("creep.anim"));
+	PhysObject* phys = enemyTemplate->AddComponent<PhysObject>();
+	phys->SetDrag(AI_PHYS_DRAG);
+	phys->SetAngularDrag(AI_PHYS_ADRAG);
+	ColliderPolygon* colPol = enemyTemplate->AddComponent<ColliderPolygon>();
 	colPol->GenerateShape(9, tex->GetWidth() / 2);
-	colPol->SetRestitution(0.2f);
-	enemy->AddComponent<AIAgent>();
-	enemy->GetTransform()->SetLocalPosition(Vector2(10000.0f, 10000.0f));
+	colPol->SetRestitution(AI_PHYS_RES);
+	enemyTemplate->AddComponent<AIAgent>();
+	//Teleport away since it was just a template
+	enemyTemplate->GetTransform()->SetLocalPosition(Vector2(10000.0f, 10000.0f));
+
+	//Create throwable
+	tex = GetTexture("battery1.png");
+	throwableTemplate = mainScene->CreateEntity();
+	throwableTemplate->AddComponent<Sprite>()->SetAnimation(GetAnimation("battery.anim"));
+	phys = throwableTemplate->AddComponent<PhysObject>();
+	phys->SetDrag(THROWABLE_PHYS_DRAG);
+	phys->SetAngularDrag(THROWABLE_PHYS_ADRAG);
+	box = throwableTemplate->AddComponent<ColliderBox>();
+	box->GenerateBox(Vector2(tex->GetWidth(), tex->GetHeight()) / 2);
+	box->SetRestitution(THROWABLE_PHYS_RES);
+	throwableTemplate->AddComponent<Throwable>();
+	throwableTemplate->GetTransform()->Translate(Vector2(100000, 100000));
 
 	//Create scene now that wall and AI have been defined
 	CreateSceneFromMap();
@@ -79,15 +99,15 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 	player = mainScene->CreateEntity();
 	tex = GetTexture("legs.png");
 	player->AddComponent<Player>();
-	player->AddComponent<Sprite>()->SetAnimation(GetAnimation("block.anim"));
+	player->AddComponent<Sprite>()->SetAnimation(GetAnimation("legs.anim"));
 	colPol = player->AddComponent<ColliderPolygon>();
 	colPol->GenerateShape(9, tex->GetWidth() / 2);
-	player->GetTransform()->Rotate(1.3f);
 
 	//Create upper body
 	Entity* torso = mainScene->CreateEntity(player->GetTransform());
-	spr = torso->AddComponent<Sprite>();
+	Sprite* spr = torso->AddComponent<Sprite>();
 	spr->SetAnimation(GetAnimation("torso.anim"));
+	spr->SetFrameRate(0.0);
 	spr->SetDepth(-1.0f);
 	player->GetComponent<Player>()->SetTargeter(torso->GetTransform());
 
@@ -196,7 +216,7 @@ void Game2D::Update(float deltaTime)
 			if (mag > 0)
 			{
 				vec /= mag;
-				physTarget->AddForce(vec * 300.0f * deltaTime);
+				physTarget->AddForce(vec * 600.0f * deltaTime);
 			}
 		}
 	}
@@ -205,10 +225,10 @@ void Game2D::Update(float deltaTime)
 		physTarget = nullptr;
 	}
 
-	if (input->WasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_RIGHT))
-	{
-		aiManager->CheckSound(Sound(mousePos, 500, 500));
-	}
+	//if (input->WasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_RIGHT))
+	//{
+	//	aiManager->CheckSound(Sound(mousePos, 500, 500));
+	//}
 
 	//Player flowfield
 	if (playerFlowField != nullptr)
@@ -305,8 +325,12 @@ void Game2D::Draw()
 	float windowHeight = (float)application->GetWindowHeight();
 	char fps[32];
 	sprintf_s(fps, 32, "FPS: %i", application->GetFPS());
-	m_2dRenderer->DrawText2D(m_font, fps, 15.0f, windowHeight - 32.0f);
-	m_2dRenderer->DrawText2D(m_font, "WASD to move camera.", 15.0f, windowHeight - 96.0f);
+	Vector2 camPos;
+	m_2dRenderer->GetCameraPos(camPos.x, camPos.y);
+	m_2dRenderer->DrawText2D(m_font, fps, camPos.x + 15.0f, camPos.y + windowHeight - 32.0f);
+	m_2dRenderer->DrawText2D(m_font, "WASD to move", camPos.x + 15.0f, camPos.y + windowHeight - 52.0f);
+	m_2dRenderer->DrawText2D(m_font, "Mouse2: Pickup/Drop batteries", camPos.x + 15.0f, camPos.y + windowHeight - 72.0f);
+	m_2dRenderer->DrawText2D(m_font, "Mouse1: Throw batteries", camPos.x + 15.0f, camPos.y + windowHeight - 92.0f);
 
 	// Done drawing sprites. Must be called at the end of the Draw().
 	m_2dRenderer->End();
@@ -337,9 +361,24 @@ Pathfinder* Game2D::GetPathfinder()
 	return pathfinder;
 }
 
+AIManager* Game2D::GetAIManager()
+{
+	return aiManager;
+}
+
 Scene* Game2D::GetMainScene()
 {
 	return mainScene;
+}
+
+Throwable* Game2D::GetThrowable(int i)
+{
+	return throwables[i];
+}
+
+int Game2D::GetThrowableCount()
+{
+	return throwables.size();
 }
 
 void Game2D::LoadTextures()
@@ -387,7 +426,7 @@ void Game2D::CreateSceneFromMap()
 			{
 			case 1:
 			{
-				entity = wall->Clone();
+				entity = wallTemplate->Clone();
 				entity->GetTransform()->SetLocalPosition({ (float)x * CELL_SIZE, (float)y * CELL_SIZE });
 				pathfinder->GetNode(x, y)->blocked = true;
 			}
@@ -401,13 +440,21 @@ void Game2D::CreateSceneFromMap()
 
 			case 4:
 			{
-				entity = enemy->Clone();
+				entity = enemyTemplate->Clone();
 				AIAgent* agent = entity->GetComponent<AIAgent>();
 				aiManager->AddAgent(agent);
 				agent->SetSpawn({ (float)x * CELL_SIZE, (float)y * CELL_SIZE });
 				entity->GetTransform()->SetLocalPosition(agent->GetSpawn());
 			}
 			break;
+
+			case 5:
+			{
+				entity = throwableTemplate->Clone();
+				Throwable* throwable = entity->GetComponent<Throwable>();
+				throwables.push_back(throwable);
+				entity->GetTransform()->SetLocalPosition({ (float)x * CELL_SIZE, (float)y * CELL_SIZE });
+			}
 
 			default:
 				break;

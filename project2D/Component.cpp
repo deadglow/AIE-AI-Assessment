@@ -10,3 +10,13 @@ Entity* Component::GetEntity()
 {
 	return entity;
 }
+
+bool Component::IsEnabled()
+{
+	return enabled;
+}
+
+void Component::SetEnabled(bool state)
+{
+	enabled = state;
+}

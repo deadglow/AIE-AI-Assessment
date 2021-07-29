@@ -21,6 +21,7 @@ class Entity;
 class Sprite;
 class Animation;
 class PhysObject;
+class Throwable;
 
 class Game2D : public aie::Game
 {
@@ -41,8 +42,14 @@ public:
 	CollisionManager* GetCollisionManager();
 	
 	Pathfinder* GetPathfinder();
+
+	AIManager* GetAIManager();
 	
 	Scene* GetMainScene();
+
+	Throwable* GetThrowable(int i);
+
+	int GetThrowableCount();
 
 	void LoadTextures();
 
@@ -57,30 +64,33 @@ public:
 protected:
 	aie::Renderer2D* m_2dRenderer;
 
-	CollisionManager* collisionManager;
-
-	MushRoom* room;
-
-	Pathfinder* pathfinder;
-	AIManager* aiManager;
-
-	Scene* mainScene;
-	
-	Entity* player;
-	Entity* wall;
-	Entity* enemy;
-
-	Vector2 playerSpawn;
-	SoundFieldNode* playerFlowField = nullptr;
-	
-	aie::Font* m_font;
-
 	std::map<std::string, aie::Texture*> textures;
 	std::map<std::string, Animation*> animations;
+
+	aie::Font* m_font;
+
+	CollisionManager* collisionManager;
+	Pathfinder* pathfinder;
+	AIManager* aiManager;
+	MushRoom* room;
+	Scene* mainScene;
+
+	Vector2 playerSpawn;
+	
+	Entity* player;
+	Entity* wallTemplate;
+	Entity* enemyTemplate;
+	Entity* throwableTemplate;
+
+	std::vector<Throwable*> throwables;
+
+	//Used for lighting
+	SoundFieldNode* playerFlowField = nullptr;
 
 	std::queue<Sprite*> spriteDrawCalls;
 
 	bool drawColliders = false;
 
+	//Temp
 	PhysObject* physTarget;
 };

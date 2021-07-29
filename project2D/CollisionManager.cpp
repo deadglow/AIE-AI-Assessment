@@ -18,17 +18,27 @@ void CollisionManager::CheckCollisions()
 	
 	while (iterator != colliders.end())
 	{
+		//Dereference collider a
+		Collider* a = *iterator;
+
+		//Skip if this collider isn't enabled
+		if (!a->IsEnabled())
+		{
+			iterator++;
+			continue;
+		}
+
 		//Create iterator starting at next element from current iterator
 		auto subIterator = iterator;
 		subIterator++;
+
 		while (subIterator != colliders.end())
 		{
-			//Dereference iterators to get colliders
-			Collider* a = *iterator;
+			//Dereference collider b
 			Collider* b = *subIterator;
 
-			//Static vs static is unecessary
-			if (a->IsStatic() && b->IsStatic())
+			//Static vs static is unecessary, neither is a disabled collider
+			if ((a->IsStatic() && b->IsStatic()) || !b->IsEnabled())
 			{
 				subIterator++;
 				continue;
@@ -86,6 +96,7 @@ void CollisionManager::CheckCollisions()
 
 			if (collided)
 			{
+				//Get average restitution
 				float restitution = (a->GetRestitution() + b->GetRestitution()) * 0.5f;
 
 				//Generate collision
@@ -95,13 +106,18 @@ void CollisionManager::CheckCollisions()
 				col.resolveDistance = resolveDistance;
 				col.relativePosition = a->GetEntity()->GetTransform()->GetGlobalPosition() - b->GetEntity()->GetTransform()->GetGlobalPosition();
 				col.finalRestitution = restitution;
-				col.finalMomentum = Vector2();
+				col.finalMomentum = 0.0f;
 				PhysObject* aPhys = a->GetEntity()->GetComponent<PhysObject>();
 				PhysObject* bPhys = b->GetEntity()->GetComponent<PhysObject>();
-				if (aPhys != nullptr && bPhys != nullptr)
+				
+				//Momentum calc
+				if (aPhys != nullptr)
 				{
-					col.finalMomentum += aPhys->GetVelocity() / aPhys->GetInverseMass();
-					col.finalMomentum += bPhys->GetVelocity() / bPhys->GetInverseMass();
+					col.finalMomentum = aPhys->GetVelocity().Magnitude() / aPhys->GetInverseMass();
+				}
+				if (bPhys != nullptr)
+				{
+					col.finalMomentum = std::max(col.finalMomentum, bPhys->GetVelocity().Magnitude() / bPhys->GetInverseMass());
 				}
 
 				//Pass collision to collider a

@@ -41,7 +41,7 @@ bool AIManagerBehaviours::QUERY_CheckAheadFree(AIAgent* agent)
 bool AIManagerBehaviours::ACTION_SetHuntTimer(AIAgent* agent)
 {
 	agent->BeginHunting(HUNT_TIME);
-	return true;
+	return true;	
 }
 
 bool AIManagerBehaviours::ACTION_Attack(AIAgent* agent)

@@ -96,7 +96,10 @@ void Entity::Update()
 	//Main update loop
 
 	for (auto& iter : components)
-		iter.second->Update();
+	{
+		if (iter.second->IsEnabled())
+			iter.second->Update();
+	}
 
 	for (Transform* t : *transform->GetChildrenList())
 	{
