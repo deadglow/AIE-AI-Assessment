@@ -3,6 +3,7 @@
 #include "AIManager.h"
 #include "Application.h"
 #include "SoundField.h"
+#include <cmath>
 
 AIAgent::~AIAgent()
 {
@@ -26,9 +27,10 @@ AIAgent* AIAgent::CloneTo(Entity* ent)
 
 void AIAgent::Update()
 {
+	float deltaTime = aie::Application::GetInstance()->GetDeltaTime();
 	if (huntTimer > 0)
 	{
-		huntTimer -= aie::Application::GetInstance()->GetDeltaTime();
+		huntTimer -= deltaTime;
 		entity->GetComponent<Sprite>()->SetFrameRate(AGENT_HUNT_ANIMSPEED);
 		speed = AGENT_HUNT_SPEED;
 	}
@@ -36,6 +38,28 @@ void AIAgent::Update()
 	{
 		entity->GetComponent<Sprite>()->SetFrameRate(AGENT_PATROL_ANIMSPEED);
 		speed = AGENT_PATROL_SPEED;
+	}
+
+	if (desiredDirection.SqrMagnitude() > 0)
+	{
+		float angle = Vector2::SignedAngle(entity->GetTransform()->GetRight(), desiredDirection);
+
+		if (!std::isnan(angle))
+		{
+			float frameRotation = sign(angle) * AGENT_ROTATION_SPEED * deltaTime;
+
+			entity->GetTransform()->Rotate(std::min(angle, frameRotation));
+		}
+	}
+}
+
+void AIAgent::OnCollision(Collision collision)
+{
+	Player* player = collision.other->GetEntity()->GetComponent<Player>();
+
+	if (player != nullptr)
+	{
+		player->KillPlayer();
 	}
 }
 
@@ -90,7 +114,6 @@ void AIAgent::SetManager(AIManager* manager)
 
 void AIAgent::Accelerate(Vector2 direction)
 {
-
 	PhysObject* phys = entity->GetComponent<PhysObject>();
 	
 	Vector2 accelVec = (direction * speed) - phys->GetVelocity();
@@ -106,8 +129,6 @@ void AIAgent::Accelerate(Vector2 direction)
 	if (Vector2::Dot(direction, phys->GetVelocity()) <= 0)
 		potentialAccel *= AGENT_FRICTION_MULT;
 
-	entity->GetTransform()->SetUp(phys->GetVelocity().Normalised());
-
 	//Convert to acceleration this frame
 	accelVec *= std::min(potentialAccel, remainSpeed);
 
@@ -122,6 +143,7 @@ void AIAgent::TravelToTarget()
 	//Get the direction of that node
 	int index = manager->GetPathfinder()->GetIndex((int)node.x, (int)node.y);
 	Vector2 direction = soundField->GetSoundFieldNode(index)->direction;
+	desiredDirection = direction;
 
 	Accelerate(direction);
 }
@@ -133,16 +155,24 @@ void AIAgent::TravelToSpawn()
 
 	//Get the direction of that node
 	Vector2 direction = spawnFlowField[manager->GetPathfinder()->GetIndex((int)node.x, (int)node.y)].direction;
+	desiredDirection = direction;
 
 	Accelerate(direction);
 }
 
 void AIAgent::Attack()
 {
+	//Jump towards sound source
 	Vector2 targetVector = soundField->GetSound().position - entity->GetTransform()->GetGlobalPosition();
 	targetVector = targetVector.Normalised();
+	
+	desiredDirection = targetVector;
+	//entity->GetTransform()->SetRight(targetVector);
 
 	entity->GetComponent<PhysObject>()->SetVelocity(targetVector * AGENT_ATTACK_IMPULSE);
+
+	//Slow mo for dramatic effect
+	entity->GetGameData()->StartSlowMotion(0.2f, 1.0f);
 }
 
 void AIAgent::LookAround(float speed)
@@ -150,11 +180,14 @@ void AIAgent::LookAround(float speed)
 	Transform* transform = entity->GetTransform();
 	Vector2 offset = soundField->GetSound().position - transform->GetGlobalPosition();
 	
+	//Sway left and right over time
 	if (offset.SqrMagnitude() > 0.00001f)
 	{
-		float rotation = Vector2::SignedAngle(offset, Vector2::Right());
-		rotation += std::sinf(huntTimer * LOOK_AROUND_SPEED) * AGENT_ROTATION_DEGREES * DEG2RAD;
-		transform->SetGlobalRotation(rotation);
+		offset = offset.Normalised();
+		Vector2 rangle = offset.RightAngle();
+		if (std::sinf(huntTimer * LOOK_AROUND_SPEED) < 0)
+			rangle = -rangle;
+		desiredDirection = rangle;
 	}
 
 }
@@ -193,7 +226,7 @@ bool AIAgent::IsSpawnInRange(int range)
 bool AIAgent::IsWallAhead()
 {
 	//Get node pos from world pos
-	Vector2 ahead = entity->GetTransform()->GetGlobalPosition() + (entity->GetTransform()->GetUp() * CELL_SIZE);
+	Vector2 ahead = entity->GetTransform()->GetGlobalPosition() + (entity->GetTransform()->GetRight() * CELL_SIZE);
 	return (manager->GetPathfinder()->GetNodeFromPos(ahead)->blocked);
 }
 
@@ -206,4 +239,5 @@ void AIAgent::MoveForward()
 void AIAgent::Rotate(float radians)
 {
 	entity->GetTransform()->Rotate(radians);
+	desiredDirection = entity->GetTransform()->GetLocalTransform().GetRight();
 }

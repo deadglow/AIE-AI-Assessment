@@ -6,6 +6,9 @@
 #define SOUND_RADIUS 500
 #define SOUND_LOUDNESS 500
 
+#define SLOWMO_SCALE 0.2f
+#define SLOWMO_DURATION 0.7f
+
 class Transform;
 
 class Throwable :

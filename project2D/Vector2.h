@@ -3,6 +3,10 @@
 
 namespace MathMan
 {
+	static int sign(int x)
+	{
+		return (x > 0) - (x < 0);
+	}
 	#define DEG2RAD 0.01745329
 	#define RAD2DEG	57.2957795
 	#define PI 3.14159265359

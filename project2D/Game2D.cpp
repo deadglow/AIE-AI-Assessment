@@ -14,20 +14,6 @@
 #include "AIManager.h"
 #include "ComponentIncludes.h"
 
-#define TEXTURE_DIRECTORY "textures/"
-#define MUSHROOM_DIRECTORY "maps/exports/"
-#define FONT_DIRECTORY "font/consolas.ttf"
-#define ANIM_DIRECTORY "anims/"
-
-#define LOADED_MAP "map.mushroom"
-
-#define AI_PHYS_DRAG 0.4f
-#define AI_PHYS_ADRAG 0.4f
-#define AI_PHYS_RES 0.2f
-#define THROWABLE_PHYS_DRAG 0.6f
-#define THROWABLE_PHYS_ADRAG 0.8f
-#define THROWABLE_PHYS_RES 0.3f
-
 Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game(title, width, height, fullscreen)
 {
 	// Initalise the 2D renderer.
@@ -35,7 +21,7 @@ Game2D::Game2D(const char* title, int width, int height, bool fullscreen) : Game
 	aie::Application::GetInstance()->SetVSync(false);
 
 	//Initialise font, textures and animation
-	m_font = new aie::Font(FONT_DIRECTORY, 24);
+	m_font = new aie::Font(FONT_DIRECTORY, 20);
 	LoadTextures();
 	LoadAnimations();
 
@@ -130,7 +116,6 @@ Game2D::~Game2D()
 	if (playerFlowField != nullptr)
 		delete[] playerFlowField;
 
-
 	// Deleted the textures.
 	delete m_font;
 	
@@ -155,88 +140,53 @@ void Game2D::Update(float deltaTime)
 	aie::Input* input = aie::Input::GetInstance();
 	aie::Application* application = aie::Application::GetInstance();
 
+	tutorialTimer -= deltaTime;
+
 	// Exit the application if escape is pressed.
 	if (input->IsKeyDown(aie::INPUT_KEY_ESCAPE))
+	{
+		playerQuit = true;
+		application->Quit();
+	}
+
+	if ((winObject->GetTransform()->GetGlobalPosition() - playerSpawn).SqrMagnitude() < WIN_RADIUS * WIN_RADIUS)
+	{
+		GameWin();
+	}
+
+	//Check player dead
+	if (!player->GetComponent<Player>()->IsAlive())
 	{
 		application->Quit();
 	}
 
-	float camPosX;
-	float camPosY;
-
-	m_2dRenderer->GetCameraPos(camPosX, camPosY);
-
-	Vector2 mousePos = { (float)input->GetMouseX(), (float)input->GetMouseY() };
-
-	mousePos += {camPosX, camPosY};
-
-	if (input->WasKeyPressed(aie::INPUT_KEY_C))
+	//Update slowmotion
+	if (slowMotionTimer > 0)
 	{
-		Entity* clone = player->Clone();
-		clone->GetTransform()->Translate(-Vector2::One() * 10.0f, false);
-		clone->GetComponent<Player>()->SetTargeter(clone->GetTransform()->GetChild(0));
+		slowMotionTimer -= application->GetUnscaledDeltaTime();
+		if (slowMotionTimer <= 0)
+		{
+			slowMotionTimer = 0;
+			application->SetTimeScale(1.0f);
+		}
 	}
+
+	//Get camera position
+	Vector2 camPos = Vector2();
+	m_2dRenderer->GetCameraPos(camPos.x, camPos.y);
+
+	//Get mousePosition in world space
+	Vector2 mousePos = { (float)input->GetMouseX(), (float)input->GetMouseY() };
+	mousePos += camPos;
 
 	if (input->WasKeyPressed(aie::INPUT_KEY_B))
 		drawColliders = !drawColliders;
-	
-	if (input->IsKeyDown(aie::INPUT_KEY_M))
-		application->SetTimeScale(0.5f);
-	else
-		application->SetTimeScale(1.0f);
 
-	//Drag dudes
-	if (input->IsMouseButtonDown(aie::INPUT_MOUSE_BUTTON_LEFT))
-	{
-		if (physTarget == nullptr)
-		{
-			float dist = 30.0f;
-
-			physTarget = nullptr;
-
-			for (auto& child : *mainScene->GetTransform()->GetChildrenList())
-			{
-				PhysObject* phys = child->GetEntity()->GetComponent<PhysObject>();
-
-				if (phys != nullptr)
-				{
-					float newDist = (child->GetGlobalPosition() - mousePos).Magnitude();
-					if (newDist < dist)
-					{
-						physTarget = phys;
-						dist = newDist;
-					}
-				}
-			}
-		}
-		else
-		{
-			Vector2 vec = mousePos - physTarget->GetEntity()->GetTransform()->GetGlobalPosition();
-			float mag = vec.Magnitude();
-			if (mag > 0)
-			{
-				vec /= mag;
-				physTarget->AddForce(vec * 600.0f * deltaTime);
-			}
-		}
-	}
-	else
-	{
-		physTarget = nullptr;
-	}
-
-	//if (input->WasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_RIGHT))
-	//{
-	//	aiManager->CheckSound(Sound(mousePos, 500, 500));
-	//}
-
-	//Player flowfield
+	//Update player flowfield
 	if (playerFlowField != nullptr)
 		delete[] playerFlowField;
-
-	 playerFlowField = nullptr;
+	playerFlowField = nullptr;
 	pathfinder->CreateFlowField(playerFlowField, player->GetTransform()->GetGlobalPosition());
-
 
 	//Call update and then check collisions
 	mainScene->Update();
@@ -245,10 +195,24 @@ void Game2D::Update(float deltaTime)
 	collisionManager->CheckCollisions();
 	mainScene->GetTransform()->UpdateGlobalMatrix();
 
+	//Update cameraPosition
 	Vector2 newCamPos = player->GetTransform()->GetGlobalPosition();
+	//Center camera on player
 	newCamPos = newCamPos - Vector2((float)application->GetWindowWidth(), (float)application->GetWindowHeight()) / 2;
-	m_2dRenderer->SetCameraPos(newCamPos.x, newCamPos.y);
-
+	
+	Vector2 offset = newCamPos - camPos;
+	float dist = offset.Magnitude();
+	if (dist > 0)
+	{
+		Vector2 direction = offset / dist;
+		//Player is far enough away from the center to limit the camera closer
+		if (dist > CAMERA_EDGE)
+		{
+			//Only move camera so the player is within the defined limits
+			newCamPos -= direction * (CAMERA_EDGE);
+			m_2dRenderer->SetCameraPos(newCamPos.x, newCamPos.y);
+		}
+	}
 }
 
 void Game2D::Draw()
@@ -262,39 +226,52 @@ void Game2D::Draw()
 	// Prepare the renderer. This must be called before any sprites are drawn.
 	m_2dRenderer->Begin();
 	
-	//Draw all sprites in queue
-	Vector2 playerPos = player->GetTransform()->GetGlobalPosition();
+	//Set default sprite colour
+	m_2dRenderer->SetRenderColour(1.0f, 1.0f, 1.0f);
 
+	//Initialise variables for flashlight drawing
+	Vector2 playerPos = player->GetTransform()->GetGlobalPosition();
+	Sprite* sprite;
+	float dist, nodeDist, finalRatio, radiusRatio, gScoreRatio;
+	PathfinderNode* node;
+	
+	//Draw all sprites in queue
 	while (!spriteDrawCalls.empty())
 	{
-		m_2dRenderer->SetRenderColour(1.0f, 1.0f, 1.0f);
+		sprite = spriteDrawCalls.front();
+		spriteDrawCalls.pop();
 
 		if (playerFlowField != nullptr)
 		{
-			float dist = (playerPos - spriteDrawCalls.front()->GetEntity()->GetTransform()->GetGlobalPosition()).Magnitude();
-			PathfinderNode* node = pathfinder->GetNodeFromPos(spriteDrawCalls.front()->GetEntity()->GetTransform()->GetGlobalPosition());
-			float nodeDist = (float)playerFlowField[pathfinder->GetIndex(node->x, node->y)].gScore;
-	#define scale 2
-	#define distance 350.0f
-#define nodeDistance 150.0f
-			float ratio = dist / distance;
-			float otherRatio = nodeDist / nodeDistance;
+			//Calculates ratio of the sprite's distance from the player and the radius of the flashlight
+			dist = (playerPos - sprite->GetEntity()->GetTransform()->GetGlobalPosition()).SqrMagnitude();
+			radiusRatio = dist / (FLASHLIGHT_RADIUS * FLASHLIGHT_RADIUS);
+			
+			//Calculates ratio of the sprite's gscore from player and the flashlight max gscore
+			node = pathfinder->GetNodeFromPos(sprite->GetEntity()->GetTransform()->GetGlobalPosition());
+			nodeDist = (float)playerFlowField[pathfinder->GetIndex(node->x, node->y)].gScore;
+			gScoreRatio = nodeDist / FLASHLIGHT_MAX_GSCORE;
 
-			ratio = std::max(ratio, otherRatio);
+			//Choose the largest ratio
+			finalRatio = std::max(radiusRatio, gScoreRatio);
 
-			ratio = std::clamp(scale - (scale * ratio * ratio), 0.0f, 1.0f);
-			m_2dRenderer->SetRenderColour(1.0f * ratio, 1.0f * ratio, 1.0f * ratio);
-
+			//Negative quadratic falloff, clamped to 0-1. Falloff dictates how steep the falloff is
+			finalRatio = std::clamp(FLASHLIGHT_FALLOFF - (FLASHLIGHT_FALLOFF * finalRatio * finalRatio), 0.0f, 1.0f);
+			//Set the 
+			m_2dRenderer->SetRenderColour(1.0f * finalRatio, 1.0f * finalRatio, 1.0f * finalRatio);
 		}
-		spriteDrawCalls.front()->Draw();
-		spriteDrawCalls.pop();
+		//DRAW!
+		sprite->Draw();
 	}
 
+	//Debug purposes
 	if (drawColliders)
 	{
+		//Draw colliders
 		m_2dRenderer->SetRenderColour(0.0f, 1.0f, 0.0f);
 		collisionManager->DrawColliders(m_2dRenderer);
 
+		//Draw last soundfield
 		if (aiManager->GetSoundFieldCount() > 0)
 		{
 			SoundField* soundField = aiManager->GetNewestSoundField();
@@ -312,9 +289,7 @@ void Game2D::Draw()
 
 						m_2dRenderer->DrawLine(origin.x, origin.y, end.x, end.y, 1.2f);
 						m_2dRenderer->DrawCircle(origin.x, origin.y, 3.0f);
-
 					}
-
 				}
 			}
 		}
@@ -323,14 +298,28 @@ void Game2D::Draw()
 	// Draw some text.
 	m_2dRenderer->SetRenderColour(1.0f, 1.0f, 1.0f, 1.0f);
 	float windowHeight = (float)application->GetWindowHeight();
+	float windowWidth = (float)application->GetWindowWidth();
 	char fps[32];
 	sprintf_s(fps, 32, "FPS: %i", application->GetFPS());
 	Vector2 camPos;
 	m_2dRenderer->GetCameraPos(camPos.x, camPos.y);
 	m_2dRenderer->DrawText2D(m_font, fps, camPos.x + 15.0f, camPos.y + windowHeight - 32.0f);
 	m_2dRenderer->DrawText2D(m_font, "WASD to move", camPos.x + 15.0f, camPos.y + windowHeight - 52.0f);
-	m_2dRenderer->DrawText2D(m_font, "Mouse2: Pickup/Drop batteries", camPos.x + 15.0f, camPos.y + windowHeight - 72.0f);
-	m_2dRenderer->DrawText2D(m_font, "Mouse1: Throw batteries", camPos.x + 15.0f, camPos.y + windowHeight - 92.0f);
+	m_2dRenderer->DrawText2D(m_font, "Mouse2: Pickup/Drop item", camPos.x + 15.0f, camPos.y + windowHeight - 72.0f);
+	m_2dRenderer->DrawText2D(m_font, "Mouse1: Throw item", camPos.x + 15.0f, camPos.y + windowHeight - 92.0f);
+	m_2dRenderer->DrawText2D(m_font, "ESC: Quit", camPos.x + 15.0f, camPos.y + windowHeight - 112.0f);
+	
+	//Win message
+	if (gameWon)
+		m_2dRenderer->DrawText2D(m_font, "You win!", camPos.x + (windowWidth * 0.5f) - 100.0f, camPos.y + (windowHeight * 0.5f));
+
+	//Fades out after a bit
+	if (tutorialTimer > 0)
+	{
+		float ratio = tutorialTimer;
+		m_2dRenderer->SetRenderColour(1.0f, 1.0f, 1.0f, std::min(tutorialTimer, 1.0f));
+		m_2dRenderer->DrawText2D(m_font, "Find the relic and return here. They can hear you...", camPos.x + (windowWidth * 0.5f) - 250.0f, camPos.y + (windowHeight * 0.5f));
+	}
 
 	// Done drawing sprites. Must be called at the end of the Draw().
 	m_2dRenderer->End();
@@ -385,6 +374,7 @@ void Game2D::LoadTextures()
 {
 	std::string path = TEXTURE_DIRECTORY;
 
+	//Load a texture for every entry in the directory
 	for (const auto& entry : std::filesystem::directory_iterator(path))
 	{
 		textures.insert(std::make_pair(entry.path().filename().string(), new aie::Texture(entry.path().string().c_str())));
@@ -395,16 +385,20 @@ void Game2D::LoadAnimations()
 {
 	std::string path = ANIM_DIRECTORY;
 
+	//Loop through all entries
 	for (const auto& entry : std::filesystem::directory_iterator(path))
 	{
+		//Open anim file
 		std::ifstream animFile(entry.path().string().c_str());
 
 		std::string line;
 
+		//Add new animation to animation list
 		Animation* animation = new Animation();
 		animation->SetName(entry.path().filename().string());
 		animations.insert(std::make_pair(animation->GetName(), animation));
 
+		//Loop through each line, using the read text to get a texture
 		while (std::getline(animFile, line))
 		{
 			animation->AddFrame(GetTexture(line));
@@ -415,8 +409,8 @@ void Game2D::LoadAnimations()
 void Game2D::CreateSceneFromMap()
 {
 	int data;
-	float top = (float)room->GetHeight() * CELL_SIZE;
 	Entity* entity;
+	//Loop through the grid
 	for (int y = 0; y < room->GetHeight(); ++y)
 	{
 		for (int x = 0; x < room->GetWidth(); ++x)
@@ -426,6 +420,7 @@ void Game2D::CreateSceneFromMap()
 			{
 			case 1:
 			{
+				//Create wall
 				entity = wallTemplate->Clone();
 				entity->GetTransform()->SetLocalPosition({ (float)x * CELL_SIZE, (float)y * CELL_SIZE });
 				pathfinder->GetNode(x, y)->blocked = true;
@@ -434,12 +429,30 @@ void Game2D::CreateSceneFromMap()
 
 			case 2:
 			{
-				SetPlayerSpawn({ (float)x * CELL_SIZE, (float)y * CELL_SIZE });
+				//Set player spawn and create marker
+				Vector2 vec = { (float)x * CELL_SIZE, (float)y * CELL_SIZE };
+				SetPlayerSpawn(vec);
+				entity = mainScene->CreateEntity();
+				entity->AddComponent<Sprite>()->SetAnimation(GetAnimation("load.anim"));
+				entity->GetTransform()->SetLocalPosition(vec);
+			}
+			break;
+
+			case 3:
+			{
+				//Create relic
+				winObject = throwableTemplate->Clone();
+				Sprite* spr = winObject->GetComponent<Sprite>();
+				spr->SetAnimation(GetAnimation("relic.anim"));
+				spr->SetFrameRate(5.0f);
+				throwables.push_back(winObject->GetComponent<Throwable>());
+				winObject->GetTransform()->SetLocalPosition({ (float)x * CELL_SIZE, (float)y * CELL_SIZE });
 			}
 			break;
 
 			case 4:
 			{
+				//Duplicate AI
 				entity = enemyTemplate->Clone();
 				AIAgent* agent = entity->GetComponent<AIAgent>();
 				aiManager->AddAgent(agent);
@@ -450,11 +463,12 @@ void Game2D::CreateSceneFromMap()
 
 			case 5:
 			{
+				//Dupe throwable
 				entity = throwableTemplate->Clone();
-				Throwable* throwable = entity->GetComponent<Throwable>();
-				throwables.push_back(throwable);
+				throwables.push_back(entity->GetComponent<Throwable>());
 				entity->GetTransform()->SetLocalPosition({ (float)x * CELL_SIZE, (float)y * CELL_SIZE });
 			}
+			break;
 
 			default:
 				break;
@@ -471,4 +485,28 @@ void Game2D::AddSpriteDrawCall(Sprite* sprite)
 void Game2D::SetPlayerSpawn(Vector2 pos)
 {
 	playerSpawn = pos;
+}
+
+void Game2D::StartSlowMotion(float timeScale, float duration)
+{
+	aie::Application::GetInstance()->SetTimeScale(timeScale);
+	slowMotionTimer = duration;
+}
+
+Vector2 Game2D::GetWorldMousePos()
+{
+	Vector2 camPos = Vector2();
+	m_2dRenderer->GetCameraPos(camPos.x, camPos.y);
+
+	//Get mousePosition in world space
+	Vector2 mousePos = { (float)aie::Input::GetInstance()->GetMouseX(), (float)aie::Input::GetInstance()->GetMouseY() };
+	mousePos += camPos;
+
+	return mousePos;
+}
+
+void Game2D::GameWin()
+{
+	StartSlowMotion(0.2f, 100.0f);
+	gameWon = true;
 }

@@ -12,13 +12,20 @@ int main()
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
 	// Create the Application.
-	game = new Game2D("AIE", 1280, 720, false);
+	bool playerQuit = false;
 
-	// Run the game loop.
-	game->Run();
+	while (!playerQuit)
+	{
+		game = new Game2D("Achluophobia", 1280, 720, false);
+		
+		// Run the game loop.
+		game->Run();
 
-	// Clean up.
-	delete game;
+		playerQuit = game->playerQuit;
+
+		// Clean up.
+		delete game;
+	}
 
 	return 0;
 }

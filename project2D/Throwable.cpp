@@ -24,8 +24,8 @@ void Throwable::OnCollision(Collision collision)
 {
 	if (collision.finalMomentum > IMPACT_FORCE)
 	{
+		//entity->GetGameData()->StartSlowMotion(SLOWMO_SCALE, SLOWMO_DURATION);
 		//Make sound
-		std::cout << "BANG" << std::endl;
 		Sound sound = Sound(entity->GetTransform()->GetGlobalPosition() - (collision.resolveVector * 2), soundLoudness, soundRadius);
 		entity->GetGameData()->GetAIManager()->CheckSound(sound);
 	}
@@ -34,6 +34,7 @@ void Throwable::OnCollision(Collision collision)
 void Throwable::Throw(Vector2 velocity, float spin)
 {
 	Drop();
+	//Add impulse and spin
 	PhysObject* phys = entity->GetComponent<PhysObject>();
 	phys->SetVelocity(velocity);
 	phys->SetAngularVelocity(spin);

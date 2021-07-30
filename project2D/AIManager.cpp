@@ -88,7 +88,12 @@ void AIManager::CheckSound(Sound sound)
 		if (dist.SqrMagnitude() < sound.radius * sound.radius)
 		{
 			//Create the soundfield and assign it to agents
-			DelegateAgents(CreateSoundField(sound));
+			SoundField* soundField = CreateSoundField(sound);
+			//Don't assign if the soundfield failed
+			if (soundField != nullptr)
+			{
+				DelegateAgents(soundField);
+			}
 			return;
 		}
 	}
@@ -97,18 +102,23 @@ void AIManager::CheckSound(Sound sound)
 SoundField* AIManager::CreateSoundField(Sound sound)
 {
 	//Create flowfield to sound
-	SoundFieldNode* flowfield;
+	SoundFieldNode* flowfield = nullptr;
 
-	pathfinder->CreateFlowField(flowfield, sound.position);
+	if (pathfinder->CreateFlowField(flowfield, sound.position))
+	{
+		//Assign flowfield to new soundfield
+		SoundField* soundField = new SoundField(sound);
+		soundField->AssignFlowField(flowfield);
 
-	//Assign flowfield to new soundfield
-	SoundField* soundField = new SoundField(sound);
-	soundField->AssignFlowField(flowfield);
+		//Add to soundfield list
+		soundFields.push_back(soundField);
 
-	//Add to soundfield list
-	soundFields.push_back(soundField);
-
-	return soundField;
+		return soundField;
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 
 void AIManager::CreateSpawnFlowFields()
@@ -141,13 +151,14 @@ void AIManager::DelegateAgents(SoundField* soundField)
 		{
 			//If the path is too far the agent will not be added
 			SoundFieldNode* node = soundField->GetSoundFieldNode(pathfinder->GetIndex((int)nodePos.x, (int)nodePos.y));
-			if (node != nullptr && node->gScore < sound.loudness)
+			if (node->gScore < sound.loudness)
 			{
 				agent->SetSoundField(soundField);
 				addedAgents++;
 			}
 		}
 
+		//Limit number of agents added
 		if (addedAgents == MAX_AGENTS_PER_SOUND)
 			break;
 	}

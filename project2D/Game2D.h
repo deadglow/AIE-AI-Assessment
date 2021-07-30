@@ -12,7 +12,28 @@
 #include "SoundFieldNode.h"
 
 #define CELL_SIZE 32
+#define TEXTURE_DIRECTORY "textures/"
+#define MUSHROOM_DIRECTORY "maps/exports/"
+#define FONT_DIRECTORY "font/consolas.ttf"
+#define ANIM_DIRECTORY "anims/"
 
+#define LOADED_MAP "hive.mushroom"
+
+#define WIN_RADIUS 60.0f
+
+#define AI_PHYS_DRAG 0.4f
+#define AI_PHYS_ADRAG 0.4f
+#define AI_PHYS_RES 0.2f
+#define THROWABLE_PHYS_DRAG 0.6f
+#define THROWABLE_PHYS_ADRAG 0.8f
+#define THROWABLE_PHYS_RES 0.3f
+
+#define FLASHLIGHT_FALLOFF 2
+#define FLASHLIGHT_RADIUS 450.0f
+#define FLASHLIGHT_MAX_GSCORE 200.0f
+
+#define CAMERA_EDGE 100.0f
+#define TUTORIAL_TIME 5.0f
 
 class CollisionManager;
 class AIManager;
@@ -61,7 +82,16 @@ public:
 
 	void SetPlayerSpawn(Vector2 pos);
 
+	void StartSlowMotion(float timeScale, float duration);
+
+	Vector2 GetWorldMousePos();
+
+	//Used to distinguish the player dying and the player quitting
+	bool playerQuit = false;
+
 protected:
+	void GameWin();
+
 	aie::Renderer2D* m_2dRenderer;
 
 	std::map<std::string, aie::Texture*> textures;
@@ -77,7 +107,9 @@ protected:
 
 	Vector2 playerSpawn;
 	
+	bool gameWon = false;
 	Entity* player;
+	Entity* winObject;
 	Entity* wallTemplate;
 	Entity* enemyTemplate;
 	Entity* throwableTemplate;
@@ -91,6 +123,6 @@ protected:
 
 	bool drawColliders = false;
 
-	//Temp
-	PhysObject* physTarget;
+	float slowMotionTimer = 0;
+	float tutorialTimer = TUTORIAL_TIME;
 };

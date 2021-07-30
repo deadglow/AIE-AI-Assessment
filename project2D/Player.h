@@ -11,6 +11,9 @@ class Throwable;
 #define THROW_SPIN 800.0f
 #define PICKUP_DISTANCE 80.0f
 
+#define FOOTSTEP_RADIUS 110.0f
+#define FOOTSTEP_LOUDNESS 110.0f
+
 class Player : public Component
 {
 public:
@@ -26,11 +29,15 @@ public:
 	//Assigns a targeter transform to the player
 	void SetTargeter(Transform* t);
 
+	bool IsAlive();
+	void KillPlayer();
+
 private:
 	//Part of player that looks at mouse
 	Transform* targeter = nullptr;
 	//How fast the player can move (m/s)
 	float speed = 300.0f;
+	bool playerAlive = true;
 
 	Throwable* heldThrowable = nullptr;
 };

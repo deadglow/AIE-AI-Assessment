@@ -5,6 +5,7 @@
 #include "Entity.h"
 #include "Sprite.h"
 #include "Throwable.h"
+#include "AIManager.h"
 
 Player::~Player()
 {
@@ -27,33 +28,31 @@ void Player::Update()
 
 	Transform* transform = entity->GetTransform();
 
+	//Get input
 	Vector2 inputVec = { 0, 0 };
 	if (input->IsKeyDown(aie::INPUT_KEY_A))
-	{
 		inputVec.x -= 1.0f;
-	}
 	if (input->IsKeyDown(aie::INPUT_KEY_D))
-	{
 		inputVec.x += 1.0f;
-	}
 	if (input->IsKeyDown(aie::INPUT_KEY_W))
-	{
 		inputVec.y += 1.0f;
-	}
 	if (input->IsKeyDown(aie::INPUT_KEY_S))
-	{
 		inputVec.y -= 1.0f;
-	}
 
+	//Prevents dividing by 0
 	if (inputVec.SqrMagnitude() > 0)
 	{
+		//limit input vec to a unit circle
 		inputVec = inputVec.Normalised();
 		transform->SetUp(inputVec);
+		//Footstep noise
+		Sound sound = Sound(entity->GetTransform()->GetGlobalPosition(), FOOTSTEP_LOUDNESS, FOOTSTEP_RADIUS);
+		entity->GetGameData()->GetAIManager()->CheckSound(sound);
 	}
 
 	//Torso direction
-	Vector2 point = { (float)input->GetMouseX(), (float)input->GetMouseY() };
-	Vector2 centre = Vector2((float)app->GetWindowWidth(), (float)app->GetWindowHeight()) / 2;
+	Vector2 point = entity->GetGameData()->GetWorldMousePos();
+	Vector2 centre = entity->GetTransform()->GetGlobalPosition();
 
 	targeter->SetUp((point - centre).Normalised());
 
@@ -93,8 +92,6 @@ void Player::Update()
 		}
 	}
 
-
-
 	transform->Translate(inputVec * speed * deltaTime, true);
 }
 
@@ -103,14 +100,23 @@ void Player::SetTargeter(Transform* t)
 	targeter = t;
 }
 
+bool Player::IsAlive()
+{
+	return playerAlive;
+}
+
+void Player::KillPlayer()
+{
+	playerAlive = false;
+}
+
 void Player::OnCollision(Collision collision)
 {
-	
 	//Get outta there
 	entity->GetTransform()->Translate(collision.resolveVector, true);
 
+	//Push physobjects
 	PhysObject* otherPhys = collision.other->GetEntity()->GetComponent<PhysObject>();
-
 	if (otherPhys != nullptr)
 	{
 		otherPhys->AddForce(-collision.relativePosition.Normalised() * speed * aie::Application::GetInstance()->GetDeltaTime());
