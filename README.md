@@ -1,5 +1,6 @@
 # AIE AI Assessment (Stealth Game)
 Uses the aieBootstrap
+Builds with VS on Windows
 
 WASD moves camera
 
